@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-05-01 — D-01 confirmed
+
+**Decision:** D-01 (sync direction) = **B+ hybrid**. Staging is interactive (PM API writes allowed); production is git-only (PR-merge → `bench migrate`). Phase 7 (git roundtrip) and Phase 5 (`/fs-promote`) build against this.
+
+Open: D-02..D-08 still proposed.
+
+---
+
 ## 2026-05-01 — Phase 0 opened
 
 **Phase:** 0 — Planning & alignment

@@ -6,7 +6,7 @@
 
 | ID | Decision | Default | Owner | Status |
 |---|---|---|---|---|
-| D-01 | Sync direction | **B+ hybrid** (staging interactive, prod git-only) | Product | proposed |
+| D-01 | Sync direction | **B+ hybrid** (staging interactive, prod git-only) | Product | confirmed 2026-05-01 |
 | D-02 | Plugin namespace | **`/fs-`** | Product | proposed |
 | D-03 | mgrant-stack access | work from public README until collaborator granted | Eng | proposed |
 | D-04 | Frappe target version | **v15+** only | Eng | proposed |
