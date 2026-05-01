@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Node
+node_modules/
+.npm/
+.eslintcache
+*.log
+npm-debug.log*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Frappe / bench (when stack_core lands in Phase 2)
+sites/
+private/
+public/
+locks/
+logs/
+*.lock
+*.log
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+credentials.json
+site_config.json
+
+# Plugin local audit (created by audit-every-mutation.json hook)
+.frappe-stack/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
