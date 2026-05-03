@@ -1,0 +1,104 @@
+---
+name: frappe-api
+description: Use when calling Frappe APIs from outside (the plugin), or designing a new whitelisted endpoint inside an app. Covers token auth, rate limits, CORS, and the secure-by-default endpoint template. Triggers on phrases like "API key", "calling Frappe from…", "whitelisted method", "REST endpoint".
+---
+
+# Frappe API — secure by default
+
+## Authentication: only one acceptable mode
+
+**Token-based: `Authorization: token <api_key>:<api_secret>`**
+
+- One token per User row in Frappe.
+- Generate via Desk → User → API Access.
+- Both halves required; missing secret = 403.
+- Token inherits all the User's roles + permissions — there is no separate "service account" abstraction.
+
+For the `frappe-stack` plugin: create a dedicated `Stack Author` role and a dedicated User per environment (staging vs prod). Never reuse a human's token for the plugin.
+
+```http
+POST /api/method/stack_core.api.doctype_builder.build
+Authorization: token a1b2c3d4:secret_xyz
+Content-Type: application/json
+
+{
+  "blueprint_name": "Beneficiary",
+  "payload": "{...}"
+}
+```
+
+## Whitelisted endpoint template
+
+```python
+import frappe
+from frappe.utils import cstr
+
+@frappe.whitelist()           # implicit allow_guest=False — keep it that way
+def my_endpoint(name: str, payload: str) -> dict:
+    # 1. Permission FIRST
+    if not frappe.has_permission("Stack Blueprint", ptype="write"):
+        raise frappe.PermissionError("write on Stack Blueprint")
+
+    # 2. Sanitize string args (Frappe sends everything as strings)
+    name = cstr(name)
+
+    # 3. Validate JSON payloads explicitly
+    import json
+    try:
+        parsed = json.loads(payload)
+    except json.JSONDecodeError as e:
+        frappe.throw(f"payload not valid JSON: {e}")
+
+    # 4. Use frappe.qb or parameterized SQL — never f-strings
+    # 5. Return only what the caller needs (no full document dumps with internals)
+    return {"name": name, "ok": True}
+```
+
+## Rate limits
+
+Configure in `site_config.json`:
+
+```json
+{
+  "rate_limit": {
+    "limit": 60,
+    "window": 60,
+    "per": "ip"
+  }
+}
+```
+
+Plus per-endpoint limits in the route handler when the default is too lenient. Mutating endpoints under stack_core: 10/minute is enough.
+
+## CORS
+
+```json
+{
+  "allow_cors": "https://app.example.com,https://staging.app.example.com"
+}
+```
+
+Never `*` on a production site. Even with token auth, `*` lets any origin probe your endpoints' shape.
+
+## Error responses
+
+Frappe's default error responses leak a Python traceback when `developer_mode = 1`. Always:
+
+```json
+{ "developer_mode": 0 }
+```
+
+on production. Plus a custom error handler in `hooks.py` if you want bespoke shapes:
+
+```python
+def custom_response(response, exception):
+    return frappe.utils.response.report_error(http_status_code=500)
+```
+
+## What stack_core does for you
+
+- Every endpoint is decorated with `@audited` — writes a Stack Audit Log row regardless of success/failure.
+- Every endpoint refuses on `is_production=1` sites — direct API writes blocked, only `bench migrate` may mutate.
+- Every endpoint runs guardrail validators (schema + reserved-name + fieldtype whitelist + workflow shape) before mutation.
+
+Don't reimplement these in your own endpoints — call into `stack_core.api._decorators.audited` and `stack_core.guardrails.*`.
