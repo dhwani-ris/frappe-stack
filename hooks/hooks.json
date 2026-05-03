@@ -1,0 +1,69 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/block_dangerous_bash.py",
+            "description": "Refuse rm -rf /, bench drop-site, git push --force on protected branches, DROP/DELETE without WHERE."
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/block_direct_prod_api.py",
+            "description": "Inspect URLs/hosts; refuse if matching a site flagged is_production=1 in .frappe-stack/config.json."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/block_ignore_permissions.py",
+            "description": "Scan generated Python for ignore_permissions=True / allow_guest=True / hardcoded role checks; refuse with a citation."
+          },
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/block_credential_leak.py",
+            "description": "Scan generated content for AKIA*, Bearer literals, api_key=, password=, frappe site_config secrets."
+          },
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/block_fstring_sql.py",
+            "description": "Scan generated Python for f-string / .format() / % SQL; refuse, suggest frappe.qb or %s parameterized."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/audit_local.py",
+            "description": "Append a JSONL row to .frappe-stack/audit.jsonl with timestamp, tool, args summary, result. Independent of the on-site Stack Audit Log; this is the local-side log."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/heartbeat_check.py",
+            "description": "If HEARTBEAT.md hasn't been updated this session and a phase transition occurred (detected via PLAN.md decision-register changes), prompt the user to stamp it."
+          }
+        ]
+      }
+    ]
+  }
+}
