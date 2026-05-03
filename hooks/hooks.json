@@ -54,6 +54,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude-plugin/hook_scripts/coach_user_prompt.py",
+            "description": "Coach PM prompts at typing time. Block on real PII (Aadhaar / PAN / Indian mobile), DROP TABLE / TRUNCATE, force-merge / bypass-review intent, force-push to protected branches. Inject hidden coaching context for vague build intents (suggest matching slash command), production-write intents (redirect to /frappe-stack:promote), permission-bypass language, elevated fieldtype mentions, schema renames, A/B intents without a question, multi-blueprint features without a spec, integration setups."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
