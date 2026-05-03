@@ -1,0 +1,25 @@
+[project]
+name = "stack_core"
+version = "0.1.0"
+description = "Frappe support app for the frappe-stack Claude Code plugin. Hosts the API surface, audit log, and git-bridge that the plugin calls."
+authors = [{ name = "Dhwani Rural Information Systems" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=41.0.0",
+    "jsonschema>=4.20.0",
+    "GitPython>=3.1.40",
+]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101"]

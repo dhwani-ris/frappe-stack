@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "creation": "2026-05-03 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "workflow_name",
+  "target_doctype",
+  "is_active",
+  "column_break_meta",
+  "experiment_id",
+  "experiment_status",
+  "section_definition",
+  "states_json",
+  "transitions_json",
+  "section_validation",
+  "validation_errors"
+ ],
+ "fields": [
+  {
+   "fieldname": "workflow_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Workflow Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "target_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Target DocType",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active",
+   "default": "0"
+  },
+  {
+   "fieldname": "column_break_meta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "experiment_id",
+   "fieldtype": "Data",
+   "label": "Experiment ID",
+   "description": "Stable ID used for deterministic A/B assignment. Empty = no experiment."
+  },
+  {
+   "fieldname": "experiment_status",
+   "fieldtype": "Select",
+   "label": "Experiment Status",
+   "options": "\nRunning\nPaused\nPromoted A\nPromoted B\nAbandoned",
+   "depends_on": "experiment_id"
+  },
+  {
+   "fieldname": "section_definition",
+   "fieldtype": "Section Break",
+   "label": "Definition"
+  },
+  {
+   "fieldname": "states_json",
+   "fieldtype": "JSON",
+   "label": "States (JSON)",
+   "reqd": 1,
+   "description": "Array of state objects. Each: {name, type: 'normal'|'split'|'terminal', traffic_split?, role}."
+  },
+  {
+   "fieldname": "transitions_json",
+   "fieldtype": "JSON",
+   "label": "Transitions (JSON)",
+   "reqd": 1,
+   "description": "Array of transition objects. Each: {from, to, action, role, condition?}."
+  },
+  {
+   "fieldname": "section_validation",
+   "fieldtype": "Section Break",
+   "label": "Validation",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "validation_errors",
+   "fieldtype": "Long Text",
+   "label": "Validation Errors",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-03 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Stack Core",
+ "name": "Stack Workflow Def",
+ "naming_rule": "By fieldname",
+ "autoname": "field:workflow_name",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 0,
+   "export": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stack Admin",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
