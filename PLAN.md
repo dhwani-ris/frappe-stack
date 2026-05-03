@@ -217,19 +217,20 @@ Implementation:
 
 ## 11. Effort summary
 
-| Phase | Days |
-|---|---|
-| 0 — decisions closed | 0.5 |
-| 1 — manifest + protocol | 1–2 |
-| 2 — `stack_core` | 3–5 |
-| 3 — skills | 3–5 |
-| 4 — agents | 2–3 |
-| 5 — commands | 2 |
-| 6 — hooks | 1 |
-| 7 — git roundtrip | 3–5 |
-| 8 — A/B experiments | 3–4 |
-| 9 — release polish | 2 |
-| **Total** | **20–30 working days** |
+| Phase | Estimate (orig) | Actual |
+|---|---|---|
+| 0 — decisions closed | 0.5 d | done 2026-05-01 |
+| 1 — manifest + protocol | 1–2 d | done 2026-05-03 |
+| 2 — `stack_core` | 3–5 d | done 2026-05-03 (artifacts only; tests not executed — no bench) |
+| 3 — skills | 3–5 d | done 2026-05-03 |
+| 4 — agents | 2–3 d | done 2026-05-03 |
+| 5 — commands | 2 d | done 2026-05-03 |
+| 6 — hooks | 1 d | done 2026-05-03 |
+| 7 — git roundtrip | 3–5 d | done 2026-05-03 (folded into Phase 2 commit) |
+| 8 — A/B experiments | 3–4 d | done 2026-05-03 (integrated across Phases 2/3/5) |
+| 9 — release polish | 2 d | done 2026-05-03 (walkthroughs + operator runbooks + CHANGELOG) |
+
+All artifact work landed locally in commits across 2026-05-01 to 2026-05-03. Pending: bench smoke-test, plugin install smoke-test, push to origin.
 
 ## 12. Risks
 
