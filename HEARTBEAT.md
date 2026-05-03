@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-05-03 — Phase 1 artifacts complete
+
+**Phase:** 1 — Plugin manifest + Builder Protocol scaffolding
+**State:** artifacts written; smoke-test pending
+
+### Done
+
+- D-02..D-08 confirmed (all defaults locked).
+- D-02 amended: namespace auto-derives from manifest `name` field. Original `/fs-` proposal isn't supported by Claude Code's plugin schema; commands now invoke as `/frappe-stack:<verb>`.
+- `.claude-plugin/plugin.json` written (minimal valid manifest, `version: 0.1.0`).
+- `.claude-plugin/marketplace.json` written (single-plugin self-marketplace pattern, `source: "./"`).
+- `.claude-plugin/README.md` written (install + namespace docs).
+- `LICENSE` (MIT) added.
+- Stub directories committed: `skills/`, `agents/`, `commands/`, `hooks/`, `apps/stack_core/` (each with `.gitkeep`).
+
+### Pending checkpoint
+
+- Smoke-test: in a clean Claude Code session, run `/plugin marketplace add https://github.com/dhwani-ris/frappe-stack.git` then `/plugin install frappe-stack@frappe-stack` — confirm install succeeds with no errors. (Cannot run from inside Claude Code; needs manual operator step.)
+
+### Next
+
+Phase 2 — `stack_core` Frappe support app. DocTypes, API endpoints, guardrail validators, tests. Per `PLAN.md §3`, blocked only on a `bench` environment to scaffold against; can write the DocType JSON specs and validator code without bench, but cannot run tests until a Frappe v15+ site is available.
+
+---
+
 ## 2026-05-01 — D-01 confirmed
 
 **Decision:** D-01 (sync direction) = **B+ hybrid**. Staging is interactive (PM API writes allowed); production is git-only (PR-merge → `bench migrate`). Phase 7 (git roundtrip) and Phase 5 (`/fs-promote`) build against this.

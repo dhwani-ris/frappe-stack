@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "frappe-stack",
+  "version": "0.1.0",
+  "description": "Guided Frappe app builder for non-developers — DocTypes, Workflows, Dashboards, Reports, and Configs via slash commands, with two-way GitHub sync and best-practice guardrails baked in.",
+  "author": {
+    "name": "Dhwani Rural Information Systems"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/dhwani-ris/frappe-stack.git",
+  "homepage": "https://github.com/dhwani-ris/frappe-stack"
+}

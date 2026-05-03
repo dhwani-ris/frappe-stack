@@ -1,0 +1,14 @@
+{
+  "name": "frappe-stack",
+  "description": "Single-plugin marketplace for the frappe-stack Claude Code plugin.",
+  "owner": {
+    "name": "Dhwani Rural Information Systems"
+  },
+  "plugins": [
+    {
+      "name": "frappe-stack",
+      "source": "./",
+      "description": "Guided Frappe app builder for non-developers — DocTypes, Workflows, Dashboards, Reports, Configs via slash commands, with two-way GitHub sync and best-practice guardrails."
+    }
+  ]
+}

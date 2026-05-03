@@ -7,13 +7,13 @@
 | ID | Decision | Default | Owner | Status |
 |---|---|---|---|---|
 | D-01 | Sync direction | **B+ hybrid** (staging interactive, prod git-only) | Product | confirmed 2026-05-01 |
-| D-02 | Plugin namespace | **`/fs-`** | Product | proposed |
-| D-03 | mgrant-stack access | work from public README until collaborator granted | Eng | proposed |
-| D-04 | Frappe target version | **v15+** only | Eng | proposed |
-| D-05 | Plugin marketplace | private, install via direct git URL | Eng | proposed |
-| D-06 | Test framework for `stack_core` | `frappe.tests.utils.FrappeTestCase` (per global frappe-testing rules) | Eng | proposed |
-| D-07 | A/B in workflows — scope for v0.1 | binary split only (no n-arm); deterministic by `hash(doc.name)` | Product | proposed |
-| D-08 | Audit log retention | append-only, no purge; archive after 365 days | Compliance | proposed |
+| D-02 | Plugin namespace | **`/frappe-stack:`** (auto-derived from plugin `name`; Claude Code does not allow a separate prefix field — `/fs-` was researched-out 2026-05-03) | Product | confirmed 2026-05-03 |
+| D-03 | mgrant-stack access | work from public README until collaborator granted | Eng | confirmed 2026-05-03 |
+| D-04 | Frappe target version | **v15+** only | Eng | confirmed 2026-05-03 |
+| D-05 | Plugin marketplace | private, install via direct git URL | Eng | confirmed 2026-05-03 |
+| D-06 | Test framework for `stack_core` | `frappe.tests.utils.FrappeTestCase` (per global frappe-testing rules) | Eng | confirmed 2026-05-03 |
+| D-07 | A/B in workflows — scope for v0.1 | binary split only (no n-arm); deterministic by `hash(doc.name)` | Product | confirmed 2026-05-03 |
+| D-08 | Audit log retention | append-only, no purge; archive after 365 days | Compliance | confirmed 2026-05-03 |
 | D-09 | infra/ (Docker, CI, pre-commit) | **deferred to post-v0.1** | Product | confirmed |
 
 ## 1. Architecture overview
@@ -56,14 +56,16 @@
 ## 2. Phase 1 — Plugin manifest + Builder Protocol scaffolding (1–2 days)
 
 **Deliverables:**
-- `.claude-plugin/manifest.json` (plugin metadata, version, namespace `fs-`)
-- `.claude-plugin/README.md` (install instructions: register marketplace + add plugin)
-- `CLAUDE.md` for the plugin itself (this repo's working memory)
-- `HEARTBEAT.md` template that gets stamped on every phase transition
-- Empty skill/agent/command directories with `.gitkeep`
-- LICENSE (MIT, matching `frappe_dhwani_base`)
+- `.claude-plugin/plugin.json` (manifest — name, version, author, repo) ✓ done 2026-05-03
+- `.claude-plugin/marketplace.json` (marketplace listing — required for private install) ✓ done 2026-05-03
+- `.claude-plugin/README.md` (install instructions: register marketplace + add plugin) ✓ done 2026-05-03
+- `CLAUDE.md` for the plugin itself (this repo's working memory) ✓ done Phase 0
+- `HEARTBEAT.md` template that gets stamped on every phase transition ✓ done Phase 0
+- Empty skill/agent/command/hook directories with `.gitkeep` ✓ done 2026-05-03
+- `apps/stack_core/.gitkeep` placeholder for the support app ✓ done 2026-05-03
+- LICENSE (MIT, matching `frappe_dhwani_base`) ✓ done 2026-05-03
 
-**Checkpoint:** plugin installs in Claude Code without errors; `/fs-` commands appear (even if they only print "not implemented").
+**Checkpoint:** plugin installs in Claude Code without errors; `/frappe-stack:*` commands appear (even if empty). All artifacts written; smoke-test in a clean Claude Code session pending.
 
 ## 3. Phase 2 — `stack_core` Frappe support app (3–5 days)
 
