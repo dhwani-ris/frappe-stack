@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-05-03 — Prompt-coaching layer added
+
+**State:** added a UserPromptSubmit hook that coaches PMs at typing time, before Claude sees the prompt.
+
+### Done
+
+- `.claude-plugin/hook_scripts/coach_user_prompt.py` — the hook script. Approves by default; blocks on PII / hard-delete / bypass-review intent; coaches on vague build intents, prod-write intents, permission bypass, elevated fieldtypes, schema renames, A/B without question, multi-blueprint without spec, integrations.
+- `hooks/hooks.json` — UserPromptSubmit matcher added.
+- `skills/process/prompt-coaching/SKILL.md` — reference doc explaining what the hook reacts to and how to tune.
+- CHANGELOG.md updated.
+
+### Why this matters
+
+Skills only fire when the engineer agent loads them. The user's typed prompt happens before any agent. Without this hook, a vague PM ask reaches the model uncoached. The hook closes that gap — every free-text prompt is silently routed (or blocked, or nudged) before Claude commits to an approach.
+
+---
+
 ## 2026-05-03 — Phases 1–9 artifacts complete (local only, not pushed)
 
 **Phase:** 9 — Polish + docs

@@ -64,6 +64,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `docs/walkthroughs/` — 4 PM-facing walkthroughs (first DocType, first workflow, first experiment, first promotion).
 - `docs/operators/` — 2 DevOps runbooks (installing `stack_core`, rotating keys).
 
+### Added (Prompt coaching — 2026-05-03)
+
+- `coach_user_prompt.py` — UserPromptSubmit hook. Scans every free-text prompt at typing time, before Claude sees it.
+  - **Blocks** on: real PII (Aadhaar / PAN / Indian mobile), `DROP TABLE` / `TRUNCATE`, force-merge / bypass-review intent, force-push to protected branches.
+  - **Coaches** (injects hidden context) on: vague build intents (suggests the matching slash command), production-write intents, permission bypass, elevated fieldtype mentions, schema-rename intents, A/B intents without a question, multi-blueprint features without a spec, integration setups.
+- `skills/process/prompt-coaching/SKILL.md` — reference for what the hook does and how to tune false positives.
+
 ### Deferred to post-v0.1 (D-09)
 
 - `infra/`: Docker compose, CI workflows, pre-commit hooks. Will port from `dhwani-ris/frappe_dhwani_base` when reopened.
