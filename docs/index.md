@@ -1,88 +1,118 @@
-# frappe-stack — documentation hub
+---
+hide:
+  - navigation
+  - toc
+---
 
-The plugin in one diagram and a navigable index of every skill, agent, command, and hook.
+<div class="hero" markdown>
 
-## How the pieces fit
+<span class="status-pill">v0.1.0 · scaffold complete</span>
 
-```
-                    ┌──── User (PM in Claude Code) ────┐
-                    │                                    │
-                    │   /frappe-stack:build doctype …    │
-                    │   "make a form for X"              │
-                    │                                    │
-                    └────────────────┬───────────────────┘
-                                     │
-        ┌────────────────────────────┼─────────────────────────────┐
-        │                            │                             │
-   ┌────▼─────┐               ┌──────▼──────┐               ┌──────▼─────┐
-   │ Slash    │               │ User-       │               │ Pre-tool   │
-   │ commands │               │ Prompt-     │               │ hooks      │
-   │ (9)      │               │ Submit hook │               │ (5)        │
-   │ init     │               │ blocks PII  │               │ block      │
-   │ build    │               │ + coaches   │               │ unsafe     │
-   │ pull/push│               │ vague asks  │               │ bash/edit  │
-   │ diff     │               │             │               │            │
-   │ promote  │               └─────────────┘               └────────────┘
-   │ experim. │
-   │ review   │       Each command spawns:
-   │ ship     │       ┌──────────────────────────────────────┐
-   └──────────┘       │  Agents (8)                          │
-                      │  engineer / reviewer / tester /       │
-                      │  deployer / analyst / migrator /      │
-                      │  documenter / orchestrator            │
-                      └────────────┬─────────────────────────┘
-                                   │
-                      ┌────────────▼─────────────┐
-                      │  Skills (17)             │
-                      │  platform/   building/   │
-                      │  process/    builder-    │
-                      │              protocol    │
-                      └────────────┬─────────────┘
-                                   │
-                      ┌────────────▼─────────────────┐
-                      │  stack_core Frappe app        │
-                      │  (the API surface the plugin  │
-                      │   actually calls)             │
-                      │                               │
-                      │  /api/method/stack_core.*    │
-                      │  → guardrails (5)             │
-                      │  → DocTypes (4)               │
-                      │  → audit log                  │
-                      │  → git_bridge → GitHub        │
-                      └───────────────────────────────┘
-```
+# frappe-stack
 
-## Index
+<p class="tagline">A Claude Code plugin that lets non-developers build Frappe apps correctly — DocTypes, Workflows, Dashboards, Reports — via guided slash commands. Two-way GitHub sync. Best-practice guardrails baked in at every layer.</p>
 
-| Layer | Catalog |
-|---|---|
-| **Skills (17)** — what the engineer agent loads | [`docs/skills.md`](./skills.md) |
-| **Agents (8)** — who does what | [`docs/agents.md`](./agents.md) |
-| **Slash commands (9)** — what PMs type | [`docs/commands.md`](./commands.md) |
-| **Hooks (8)** — guardrails that fire automatically | [`docs/hooks.md`](./hooks.md) |
-| **Architecture** — how staging↔git↔prod actually flows | [`docs/architecture.md`](./architecture.md) |
-| **Walkthroughs (4)** — PM-facing tutorials | [`docs/walkthroughs/`](./walkthroughs/) |
-| **Operator runbooks (2)** — DevOps installation + key rotation | [`docs/operators/`](./operators/) |
+[Walkthrough →](walkthroughs/01-first-doctype.md){ .md-button .md-button--primary }
+[Architecture](architecture.md){ .md-button }
+[GitHub :material-github:](https://github.com/dhwani-ris/frappe-stack){ .md-button }
 
-## For first-time readers
+</div>
 
-If you have 5 minutes:
+## What it does
 
-1. Read [`docs/walkthroughs/01-first-doctype.md`](./walkthroughs/01-first-doctype.md) — that's the "before / after" for a PM.
-2. Skim [`docs/architecture.md`](./architecture.md) — the data flow staging ↔ git ↔ prod.
+<div class="grid cards" markdown>
 
-If you have 30 minutes:
+-   :material-form-textbox:{ .lg .middle } **Build forms in plain English**
 
-3. Read [`PRD.md`](../PRD.md) — what we're building and why.
-4. Read [`SECURITY.md`](../SECURITY.md) — the guardrails matrix.
-5. Skim [`docs/skills.md`](./skills.md) and [`docs/commands.md`](./commands.md) for the surface area.
+    ---
 
-If you're picking up a session mid-flight:
+    PMs type *"I need a beneficiary registration form"* — engineer agent walks fields, permissions, validation. DocType lives on staging in five minutes.
 
-6. Read [`CLAUDE.md`](../CLAUDE.md) — order of precedence + working notes.
-7. Read [`HEARTBEAT.md`](../HEARTBEAT.md) — current phase + blockers.
-8. Read [`PLAN.md`](../PLAN.md) — decision register and remaining work.
+    [:octicons-arrow-right-24: First DocType walkthrough](walkthroughs/01-first-doctype.md)
 
-## Status
+-   :material-source-branch-sync:{ .lg .middle } **Two-way GitHub sync**
 
-v0.1.0 scaffold complete (~95 files across 9 phases). **Not yet validated end-to-end** — see [`HEARTBEAT.md`](../HEARTBEAT.md) for the pending list (bench smoke-test, plugin install smoke-test, infra/ deferred).
+    ---
+
+    Site changes mirror to git automatically (`/pull`). Production is git-only — promotion via PR (`/promote`). The audit trail *is* git history.
+
+    [:octicons-arrow-right-24: Architecture](architecture.md)
+
+-   :material-shield-check:{ .lg .middle } **Guardrails at every layer**
+
+    ---
+
+    Refuses `ignore_permissions=True`, `allow_guest=True`, f-string SQL, hardcoded role checks, real PII in prompts. Defense in depth across plugin / API / DB / CI.
+
+    [:octicons-arrow-right-24: Hooks catalog](hooks.md)
+
+-   :material-flask:{ .lg .middle } **A/B in workflows**
+
+    ---
+
+    Split states route documents deterministically by `hash(experiment_id ‖ doc.name)`. Outcomes tracked. Promote the winner with one command.
+
+    [:octicons-arrow-right-24: First experiment walkthrough](walkthroughs/03-first-experiment.md)
+
+-   :material-school-outline:{ .lg .middle } **Coaching at typing time**
+
+    ---
+
+    Vague asks get nudged to the right slash command. Risky asks get blocked with reasons. Real PII in prompts is refused before Claude sees it.
+
+    [:octicons-arrow-right-24: Prompt coaching](hooks.md)
+
+-   :material-book-multiple:{ .lg .middle } **17 skills, 8 agents, 9 commands**
+
+    ---
+
+    Each is a markdown file with explicit triggers and refusals. PMs use them implicitly; reviewers can audit them directly.
+
+    [:octicons-arrow-right-24: Reference](skills.md)
+
+</div>
+
+## Reference
+
+<div class="grid cards" markdown>
+
+-   **[Skills](skills.md)** — 17 skills the engineer agent loads. Building (forms / workflows / dashboards / reports / integrations / experiments). Shipping (git roundtrip / promotion). Process (specs / triage / QA / coaching). Platform background.
+
+-   **[Agents](agents.md)** — 8 agents (engineer / reviewer / tester / deployer / analyst / migrator / documenter / orchestrator). Each pairs with the others according to a documented routing chart.
+
+-   **[Commands](commands.md)** — 9 slash commands (`/init` / `/build` / `/pull` / `/push` / `/diff` / `/promote` / `/experiment` / `/review` / `/ship`). Each refuses on specific conditions.
+
+-   **[Hooks](hooks.md)** — 8 hooks across 4 lifecycle events. Block dangerous bash, prod-API writes, permission bypass, credential leaks, f-string SQL. Coach vague prompts.
+
+</div>
+
+## Tutorials
+
+<div class="grid cards" markdown>
+
+-   **[1. First DocType](walkthroughs/01-first-doctype.md)** — Build a Beneficiary form in 10 minutes.
+
+-   **[2. First Workflow](walkthroughs/02-first-workflow.md)** — 3-stage approval flow.
+
+-   **[3. First Experiment](walkthroughs/03-first-experiment.md)** — A/B test approval paths.
+
+-   **[4. First Promotion](walkthroughs/04-first-promotion.md)** — Staging → prod via PR.
+
+</div>
+
+## For operators
+
+<div class="grid cards" markdown>
+
+-   **[Installing stack_core](operators/installing-stack-core.md)** — bench install, site_config, role setup, smoke test.
+
+-   **[Rotating keys](operators/rotating-keys.md)** — 90-day rotation per credential type. Incident protocol.
+
+</div>
+
+## Project status
+
+v0.1.0 scaffold complete — all 9 phases written + committed.
+**Pending validation:** bench smoke-test, plugin install smoke-test in a clean Claude Code session, `infra/` (deferred per D-09).
+
+See [HEARTBEAT](HEARTBEAT.md) for the live phase tracker and [PLAN](PLAN.md) for the decision register.
