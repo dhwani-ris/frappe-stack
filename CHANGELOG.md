@@ -71,6 +71,18 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - **Coaches** (injects hidden context) on: vague build intents (suggests the matching slash command), production-write intents, permission bypass, elevated fieldtype mentions, schema-rename intents, A/B intents without a question, multi-blueprint features without a spec, integration setups.
 - `skills/process/prompt-coaching/SKILL.md` — reference for what the hook does and how to tune false positives.
 
+### Added (Public-readiness pass — 2026-05-05)
+
+- `CONTRIBUTING.md` — onboarding for skills / agents / commands / hooks / `stack_core` features / bug fixes / docs. Conventional commits, security disclosure path, PR review criteria.
+- `.github/ISSUE_TEMPLATE/bug_report.md` — structured bug template with severity ladder.
+- `.github/ISSUE_TEMPLATE/feature_request.md` — 5-section template that mirrors `writing-specs` skill (problem / user / solution-shape / out-of-scope / metric).
+- `.github/ISSUE_TEMPLATE/skill_proposal.md` — for proposing new skills with trigger phrases, refusals, and pairings.
+- `.github/PULL_REQUEST_TEMPLATE.md` — surfaces reviewer / tester output + the security checklist (no `ignore_permissions=True`, no `allow_guest=True`, no f-string SQL, etc.).
+
+### Removed (2026-05-05)
+
+- References to the private `prody-dris/mgrant-stack` repo in `README.md` and `PRD.md`. Outsiders saw 404s. Replaced with a generic "internal reference" note where appropriate.
+
 ### Added (Documentation hub — 2026-05-05)
 
 - `docs/README.md` — top-level documentation index with how-the-pieces-fit diagram.

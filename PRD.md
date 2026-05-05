@@ -99,7 +99,7 @@ Full spec in `PLAN.md §8`.
 
 ## 7. Inspiration & prior art
 
-- [`prody-dris/mgrant-stack`](https://github.com/prody-dris/mgrant-stack) — the structural template (Claude Code plugin shipping skills/agents/commands/hooks for a Frappe codebase).
-- [`sunandan89/mgrant-frappe-patterns`](https://github.com/sunandan89/mgrant-frappe-patterns) — patterns catalog to absorb into our `frappe-patterns` skill.
+- [`sunandan89/mgrant-frappe-patterns`](https://github.com/sunandan89/mgrant-frappe-patterns) — patterns catalog to absorb into our `frappe-patterns` skill (when public).
 - [`dhwani-ris/frappe_dhwani_base`](https://github.com/dhwani-ris/frappe_dhwani_base) — ruff/eslint/prettier/pyupgrade pre-commit + Frappe Semgrep + pip-audit setup, when we get to `infra/`.
 - [`gavindsouza/awesome-frappe`](https://github.com/gavindsouza/awesome-frappe) — survey before building anything new.
+- The structural pattern (Claude Code plugin shipping skills/agents/commands/hooks for a Frappe codebase) was adapted from an internal reference that informs the layout and naming conventions used here.
