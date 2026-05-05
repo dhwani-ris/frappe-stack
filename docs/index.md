@@ -72,6 +72,8 @@ The init flow prompts for two things: a Frappe API key (Desk → User → API Ac
 
 -   **[Architecture](architecture.md)** — The data flow between your machine, your site, and GitHub.
 
+-   **[Testing safely](testing-safely.md)** — The four-layer test path that gives PMs the same coverage standard developers run.
+
 -   **[Reference](skills.md)** — Every skill, agent, slash command, and safeguard, with examples.
 
 -   **[DeployControl runbook](operators/deploy-control-tokens.md)** — How non-developer builders authenticate to `dhwani-ris/*` repos via 1-hour scoped tokens.

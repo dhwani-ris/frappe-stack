@@ -13,6 +13,7 @@
 | [`/frappe-stack:experiment`](../commands/experiment.md) | A/B in workflows: define / status / pause / resume / promote / abandon. | Promote with arm < 100 assignments, promote when CI crosses 0, define on a target without an existing workflow |
 | [`/frappe-stack:review`](../commands/review.md) | Standalone reviewer + tester run. Does not mutate or open PRs. | No changes to review |
 | [`/frappe-stack:ship`](../commands/ship.md) | Tag a release after a successful prod migrate. Updates CHANGELOG. | Last promote not successful, dirty working tree, version not strictly greater than last tag |
+| [`/frappe-stack:rollback`](../commands/rollback.md) | Rewind staging to a previous config-repo commit via stock REST. Idempotent. | `--site=prod` (production rolls back through reverting the merge), dirty working tree, audit-tagged resources being deleted, expired DeployControl token |
 
 ## Typical flow
 

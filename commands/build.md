@@ -1,6 +1,6 @@
 ---
-description: Build a DocType, Workflow, Dashboard, Report, Custom Field, or Property Setter. Routes to the engineer agent which loads the matching skill, generates the JSON, and POSTs to Frappe's stock REST API.
-argument-hint: <type> <name> [--from-spec=<path>]
+description: Build a DocType, Workflow, Dashboard, Report, Custom Field, or Property Setter. Routes to the engineer agent which loads the matching skill, generates the JSON, and POSTs to Frappe's stock REST API. Supports --dry-run for sandbox testing without mutating the site.
+argument-hint: <type> <name> [--from-spec=<path>] [--dry-run]
 ---
 
 # /frappe-stack:build
@@ -12,6 +12,7 @@ The most common command. Engineer agent turns intent into a Frappe configuration
 - `<type>` — one of: `doctype`, `workflow`, `dashboard`, `report`, `customfield`, `propertysetter`.
 - `<name>` — the human-readable name (e.g., `Beneficiary` for a DocType).
 - `--from-spec=<path>` — optional. If provided, engineer reads the spec section first instead of asking the PM from scratch.
+- `--dry-run` — optional. Walks the full conversation and validators, generates the JSON, runs the diff against current site state, but **does not POST to Frappe**. Use this to trial-run a design before committing. Same path a developer uses to sanity-check a fixture before `bench migrate`.
 
 ## What it does
 
@@ -44,6 +45,32 @@ The most common command. Engineer agent turns intent into a Frappe configuration
 /frappe-stack:build dashboard "Beneficiary Operations"
 /frappe-stack:build report "Disbursement Summary"
 /frappe-stack:build customfield "field_officer on Grant"
+
+# Dry-run — generate + validate, don't POST. Good for trying out a design.
+/frappe-stack:build doctype Beneficiary --dry-run
+```
+
+## Dry-run output
+
+```text
+Generated JSON for DocType "Beneficiary":
+  {
+    "name": "Beneficiary",
+    ...
+  }
+
+Validators:
+  ✓ schema (Draft 2020-12)
+  ✓ reserved-name check
+  ✓ fieldtype whitelist
+  ✓ permissions present
+
+Diff against staging:
+  + new DocType "Beneficiary" (would be created)
+  + 5 fields would be added
+  + 2 permission rows would be added
+
+Dry-run complete. To apply: re-run without --dry-run.
 ```
 
 ## Refuses if

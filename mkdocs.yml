@@ -99,6 +99,7 @@ nav:
       - "3. First Experiment": walkthroughs/03-first-experiment.md
       - "4. First Promotion": walkthroughs/04-first-promotion.md
   - Architecture: architecture.md
+  - Testing safely: testing-safely.md
   - Reference:
       - Skills: skills.md
       - Agents: agents.md

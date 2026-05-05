@@ -14,6 +14,7 @@
 | [`building/composing-reports`](../skills/building/composing-reports/SKILL.md) | "report on…", "export this list", "summary of…", "give me a CSV" | Picks Report Builder vs Query Report vs Script Report. | Raw SQL with f-strings or `.format()`, reports without `permission_query_conditions` |
 | [`building/wiring-integrations`](../skills/building/wiring-integrations/SKILL.md) | "send to Zapier", "webhook from…", "SMS notification", "S3 upload", "payment gateway" | Webhook (out) / signed-callback (in) / scheduled (pull). Forces signature+idempotency+min-work for inbound. | Inbound webhook without signature verification, embedded secrets in webhook headers |
 | [`building/designing-experiments`](../skills/building/designing-experiments/SKILL.md) | "A/B test", "compare two flows", "split traffic", "experiment with…" | Forces the question format. Walks split-state shape. | More than 2 arms (v0.1), traffic_split that doesn't sum to 100, promotion before significance |
+| [`building/seeding-data`](../skills/building/seeding-data/SKILL.md) | "seed test data", "fill the form for testing", "create dummy records" | Generates synthetic records via stock REST. Cleanup ledger produced. | Real-shaped PII patterns. >100 records (use a proper import path). Required Link to empty DocTypes. |
 
 ## Shipping things (2)
 
@@ -41,12 +42,13 @@ PMs don't read these end-to-end; the engineer agent loads the relevant one as ne
 | [`platform/frappe-patterns`](../skills/platform/frappe-patterns/SKILL.md) | Reusable client-side patterns catalog (fuzzy-search, sticky-table-freeze, sequential-save, XLSX export, India map, …) |
 | [`platform/frappe-api`](../skills/platform/frappe-api/SKILL.md) | Token auth, rate limits, CORS, secure endpoint template |
 
-## Meta-process (3)
+## Meta-process (4)
 
 | Skill | Purpose |
 |---|---|
 | [`builder-protocol`](../skills/builder-protocol/SKILL.md) | When to use the 4 memory files (`PRD.md` / `PLAN.md` / `SECURITY.md` / `HEARTBEAT.md`). Order of precedence. Decision register pattern. |
 | [`process/session-start`](../skills/process/session-start/SKILL.md) | Mandatory pre-flight: attach `Security_DRIS.md`, load `CLAUDE.md`, generate DeployControl token if pushing. Refuses to mutate code without `Security_DRIS.md`. |
+| [`meta/claude-md-template`](../skills/meta/claude-md-template/SKILL.md) | Generates a `CLAUDE.md` from the canonical template when a repo doesn't have one. Auto-fires from session-start. |
 | [`process/prompt-coaching`](../skills/process/prompt-coaching/SKILL.md) | Reference for the `UserPromptSubmit` hook — what gets blocked, what gets nudged, how to tune false positives. |
 
 ## How a skill fires

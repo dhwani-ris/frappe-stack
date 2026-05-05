@@ -54,9 +54,11 @@ git commit -m "promote: <feature>"
 git push --set-upstream origin promote/<branch>
 ```
 
-### Stage 3 — Open PR
+### Stage 3 — Open PR with self-review attached
 
 `gh` CLI primary, REST API fallback.
+
+The deployer auto-comments the **reviewer + tester output** on the PR *before* tagging the rotation. The reviewer sees the report inline rather than digging for it. This is the equivalent of a developer's pre-review self-checks — same standard, surfaced earlier so review is fast.
 
 PR body template (per `process/promoting-changes` skill):
 

@@ -47,22 +47,48 @@ The plugin still includes the four `Experiment Assignment`, A/B Custom Field, an
 
 ### 3.2 Sync model — B+ hybrid (D-01 confirmed)
 
-```
-Staging site (stock Frappe v15+)        GitHub config repo    Production site
-─────────────────────────────────       ──────────────────    ────────────────
-[ PM types in Claude Code ]                                    [ accepts changes
-       │                                                         only via PR    ]
-       ↓ /frappe-stack:build                                     [ merge → CI    ]
-  POST /api/resource/<DocType>          (versioned JSON          [ runs bench    ]
-       │                                 per blueprint)          [ migrate       ]
-       ↓                                                                ↑
-  site mutates via stock REST                                            │
-       │                                                                 │
-       ↓ /frappe-stack:pull                                              │
-  per-blueprint JSONs written to                                         │
-  local config-repo working tree                                         │
-       │                                                                 │
-       └─── /frappe-stack:promote ────→ open PR ────→ review/merge ──────┘
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#F5E6DD',
+    'primaryTextColor': '#2E2E2E',
+    'primaryBorderColor': '#8B1E24',
+    'lineColor': '#9E2A2F',
+    'secondaryColor': '#E7C1AD',
+    'tertiaryColor': '#ffffff',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '13px'
+  }
+}}%%
+flowchart LR
+    PM["PM types in<br>Claude Code"]
+    Build[/frappe-stack:build/]
+    Stage[("Staging site<br>stock Frappe v15+")]
+    Pull[/frappe-stack:pull/]
+    Repo[("GitHub config repo<br>versioned JSON<br>per blueprint")]
+    Promote[/frappe-stack:promote/]
+    PR{"PR review<br>merge"}
+    CI[Operator CI runs<br>bench migrate]
+    Prod[("Production site<br>git-only")]
+
+    PM --> Build
+    Build -->|"POST /api/resource/&lt;DocType&gt;"| Stage
+    Stage --> Pull
+    Pull -->|"per-blueprint JSONs"| Repo
+    Repo --> Promote
+    Promote --> PR
+    PR --> CI
+    CI --> Prod
+
+    classDef cmd fill:#F5E6DD,stroke:#8B1E24,stroke-width:1.5px,color:#2E2E2E,rx:10,ry:10
+    classDef store fill:#ffffff,stroke:#8B1E24,stroke-width:1.5px,color:#2E2E2E
+    classDef gate fill:#F28C38,stroke:#9E2A2F,stroke-width:1.5px,color:#ffffff
+    classDef plain fill:#ffffff,stroke:#D9B3A0,stroke-width:1px,color:#6B6B6B
+    class Build,Pull,Promote cmd
+    class Stage,Repo,Prod store
+    class PR gate
+    class PM,CI plain
 ```
 
 - Staging is the playground — fast iteration via stock REST.
