@@ -31,15 +31,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: indigo
+      primary: teal
+      accent: deep orange
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: teal
+      accent: deep orange
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -120,4 +120,9 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/dhwani-ris/frappe-stack
+    - icon: fontawesome/solid/globe
+      link: https://dhwaniris.com
   generator: false
+
+extra_css:
+  - stylesheets/extra.css
