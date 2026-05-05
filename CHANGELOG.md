@@ -71,6 +71,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - **Coaches** (injects hidden context) on: vague build intents (suggests the matching slash command), production-write intents, permission bypass, elevated fieldtype mentions, schema-rename intents, A/B intents without a question, multi-blueprint features without a spec, integration setups.
 - `skills/process/prompt-coaching/SKILL.md` — reference for what the hook does and how to tune false positives.
 
+### Added (GitHub Pages site — 2026-05-05)
+
+- `mkdocs.yml` — MkDocs Material config (light/dark palette, search, nav tabs, code copy, edit-on-GitHub buttons).
+- `requirements-docs.txt` — pinned `mkdocs`, `mkdocs-material`, `pymdown-extensions`, `pygments`.
+- `.github/workflows/docs.yml` — auto-deploys on push to `main` when docs / Builder-Protocol / mkdocs files change. Stages root-level Builder Protocol files (`PRD.md`, `PLAN.md`, `SECURITY.md`, `CLAUDE.md`, `HEARTBEAT.md`, `CHANGELOG.md`, `CONTRIBUTING.md`) into `docs/` at build time so they appear under the **Project** tab without breaking the repo's directory layout. Uses `actions/deploy-pages@v4` (no `gh-pages` branch needed).
+- Renamed `docs/README.md` → `docs/index.md` (MkDocs landing-page convention). Top-level repo browsers still land on the root `README.md`.
+- Site lives at `https://dhwani-ris.github.io/frappe-stack/` once Pages is enabled in GitHub repo settings (Source: GitHub Actions).
+
+> Crosses the D-09 deferral line slightly (D-09 deferred `infra/` Docker / CI / pre-commit). Pages is treated as docs publishing, not code CI/CD — separate concern, fine to land now.
+
 ### Added (Public-readiness pass — 2026-05-05)
 
 - `CONTRIBUTING.md` — onboarding for skills / agents / commands / hooks / `stack_core` features / bug fixes / docs. Conventional commits, security disclosure path, PR review criteria.

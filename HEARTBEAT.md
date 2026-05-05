@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-05-05 — GitHub Pages site (MkDocs Material)
+
+**State:** docs site config + GitHub Action landed. Pages will deploy automatically on push to `main` once Pages is enabled in the repo settings.
+
+### Done
+
+- `mkdocs.yml` — site config: name, description, repo URL, edit-on-GitHub, light/dark palette toggle, navigation tabs, Material icons, search with highlighting, code-block copy buttons, mermaid support.
+- `requirements-docs.txt` — pinned MkDocs Material 9.5.49 + plugins.
+- `.github/workflows/docs.yml` — checkout → install → stage root-level Builder Protocol files into `docs/` → `mkdocs build` → `actions/deploy-pages@v4`. Triggered on push to `main` for `docs/**` / `mkdocs.yml` / Builder Protocol files / the workflow itself.
+- `docs/README.md` → `docs/index.md` rename (MkDocs landing-page convention).
+- CHANGELOG updated.
+
+### Manual step required (you, in GitHub UI)
+
+1. Go to https://github.com/dhwani-ris/frappe-stack/settings/pages
+2. Under **Source**, select **GitHub Actions**.
+3. Save.
+4. Push any commit to `main` (or run the workflow manually via Actions tab → "Deploy docs site" → Run workflow).
+5. Site lands at `https://dhwani-ris.github.io/frappe-stack/`.
+
+### Why this matters
+
+External readers (potential contributors, operators evaluating the plugin, future-you on a phone during an incident) get a searchable, dark-mode-capable docs site instead of clicking through GitHub's plain markdown rendering. Reduces the activation cost of the project.
+
+### Crosses D-09 line slightly
+
+D-09 deferred `infra/` (Docker / CI / pre-commit). This adds a GitHub Action workflow, which is technically CI infrastructure. Treating Pages as **docs publishing** (separate from code CI) — the rule of thumb: anything that builds the source code or runs tests stays deferred; anything that publishes static content from existing markdown is fine.
+
+---
+
 ## 2026-05-05 — Public-readiness pass + docs hub
 
 **State:** repo prepared for going public. Documentation hub added; private-repo references removed; contributor surface added.
