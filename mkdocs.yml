@@ -1,0 +1,123 @@
+site_name: frappe-stack
+site_description: Guided Frappe app builder for non-developers — DocTypes, Workflows, Dashboards, Reports via slash commands, with two-way GitHub sync and best-practice guardrails.
+site_url: https://dhwani-ris.github.io/frappe-stack/
+site_author: Dhwani Rural Information Systems
+
+repo_url: https://github.com/dhwani-ris/frappe-stack
+repo_name: dhwani-ris/frappe-stack
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2026 Dhwani Rural Information Systems — MIT License
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+    - content.action.view
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.tilde
+  - pymdownx.caret
+
+plugins:
+  - search:
+      lang: en
+  - tags
+
+nav:
+  - Home: index.md
+  - Walkthroughs:
+      - "1. First DocType": walkthroughs/01-first-doctype.md
+      - "2. First Workflow": walkthroughs/02-first-workflow.md
+      - "3. First Experiment": walkthroughs/03-first-experiment.md
+      - "4. First Promotion": walkthroughs/04-first-promotion.md
+  - Architecture: architecture.md
+  - Reference:
+      - Skills: skills.md
+      - Agents: agents.md
+      - Commands: commands.md
+      - Hooks: hooks.md
+  - Operators:
+      - Installing stack_core: operators/installing-stack-core.md
+      - Rotating keys: operators/rotating-keys.md
+  - Project:
+      - PRD: PRD.md
+      - PLAN: PLAN.md
+      - SECURITY: SECURITY.md
+      - CLAUDE: CLAUDE.md
+      - HEARTBEAT: HEARTBEAT.md
+      - CHANGELOG: CHANGELOG.md
+      - Contributing: CONTRIBUTING.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dhwani-ris/frappe-stack
+  generator: false
