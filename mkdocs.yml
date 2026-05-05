@@ -105,6 +105,7 @@ nav:
       - Commands: commands.md
       - Hooks: hooks.md
   - Operators:
+      - DeployControl tokens: operators/deploy-control-tokens.md
       - Rotating keys: operators/rotating-keys.md
   - Project:
       - PRD: PRD.md

@@ -28,10 +28,12 @@ Refuse if any box fails:
 
 ### Stage 2 — Snapshot + commit
 
-The exporter runs locally — it pulls site state via Frappe REST and writes per-blueprint JSONs into the local config-repo checkout.
+The exporter runs locally — it pulls site state via Frappe REST and writes per-blueprint JSONs into the local config-repo checkout. All git operations use the DeployControl token from `.frappe-stack/config.json` (the local clone's `origin` URL is already in the form `https://x-access-token:<TOKEN>@github.com/dhwani-ris/<repo>` — see [DeployControl runbook](../docs/operators/deploy-control-tokens.md)).
+
+If the DeployControl token has expired (token lifetime is 1 hour), `git push` will return 401. The agent surfaces this to the user with a clear "regenerate token via DeployControl, re-run /frappe-stack:init, then /frappe-stack:promote again" message — never silently retries.
 
 ```bash
-# In the configured config-repo working dir
+# In the configured config-repo working dir (origin already token-authed)
 git fetch origin main
 git checkout -b promote/<sprint>-<feature>-<YYYYMMDD-HHMM> origin/main
 

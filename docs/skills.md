@@ -41,11 +41,12 @@ PMs don't read these end-to-end; the engineer agent loads the relevant one as ne
 | [`platform/frappe-patterns`](../skills/platform/frappe-patterns/SKILL.md) | Reusable client-side patterns catalog (fuzzy-search, sticky-table-freeze, sequential-save, XLSX export, India map, …) |
 | [`platform/frappe-api`](../skills/platform/frappe-api/SKILL.md) | Token auth, rate limits, CORS, secure endpoint template |
 
-## Meta-process (2)
+## Meta-process (3)
 
 | Skill | Purpose |
 |---|---|
 | [`builder-protocol`](../skills/builder-protocol/SKILL.md) | When to use the 4 memory files (`PRD.md` / `PLAN.md` / `SECURITY.md` / `HEARTBEAT.md`). Order of precedence. Decision register pattern. |
+| [`process/session-start`](../skills/process/session-start/SKILL.md) | Mandatory pre-flight: attach `Security_DRIS.md`, load `CLAUDE.md`, generate DeployControl token if pushing. Refuses to mutate code without `Security_DRIS.md`. |
 | [`process/prompt-coaching`](../skills/process/prompt-coaching/SKILL.md) | Reference for the `UserPromptSubmit` hook — what gets blocked, what gets nudged, how to tune false positives. |
 
 ## How a skill fires

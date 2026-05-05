@@ -56,13 +56,13 @@ Inside a Claude Code session:
 /plugin install frappe-stack@frappe-stack
 ```
 
-Then point the plugin at your Frappe v15+ site (it will prompt for an API key generated via Frappe Desk → User → API Access):
+Attach `Security_DRIS.md` to your session ([why](walkthroughs/01-first-doctype.md)), then point the plugin at your Frappe v15+ site:
 
 ```text
 /frappe-stack:init https://your-staging-site.example.com
 ```
 
-That's it. Nothing to install on the Frappe site beyond stock Frappe.
+The init flow prompts for two things: a Frappe API key (Desk → User → API Access) and a DeployControl-issued GitHub token (1-hour scoped — see the [DeployControl runbook](operators/deploy-control-tokens.md)). Nothing to install on the Frappe site beyond stock Frappe.
 
 ## Where to next
 
@@ -73,6 +73,8 @@ That's it. Nothing to install on the Frappe site beyond stock Frappe.
 -   **[Architecture](architecture.md)** — The data flow between your machine, your site, and GitHub.
 
 -   **[Reference](skills.md)** — Every skill, agent, slash command, and safeguard, with examples.
+
+-   **[DeployControl runbook](operators/deploy-control-tokens.md)** — How non-developer builders authenticate to `dhwani-ris/*` repos via 1-hour scoped tokens.
 
 </div>
 
