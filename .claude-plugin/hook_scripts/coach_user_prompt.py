@@ -17,7 +17,7 @@ Patterns we coach (see SECURITY.md and PRD.md):
   - A/B intent w/o question  -> force the question format
 Patterns we BLOCK (refuse, never coach away):
   - Real PII in prompt              (Aadhaar/PAN/phone)
-  - Hard delete on stack_core data  (audit-tagged)
+  - Hard delete on audit-tagged data (Activity Log, Experiment Assignment)
   - Force-merge / bypass-review     (compliance violation)
 """
 

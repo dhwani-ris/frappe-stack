@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new capability for the plugin or stack_core
+about: Suggest a new capability for the plugin
 title: "[feature] "
 labels: enhancement
 ---
@@ -15,7 +15,7 @@ labels: enhancement
 
 ## Proposed solution
 
-<!-- 3–7 bullets describing the major pieces. Each bullet should map to one of: skill / agent / command / hook / stack_core feature / docs. -->
+<!-- 3–7 bullets describing the major pieces. Each bullet should map to one of: skill / agent / command / hook / docs. -->
 
 -
 -

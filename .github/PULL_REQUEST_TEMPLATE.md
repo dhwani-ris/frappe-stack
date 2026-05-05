@@ -26,7 +26,6 @@ runs the reviewer + tester agents against this PR before merging.
 - [ ] agent: `agents/<…>.md`
 - [ ] command: `commands/<…>.md`
 - [ ] hook: `hooks/hooks.json` + `.claude-plugin/hook_scripts/<…>.py`
-- [ ] `stack_core` Frappe app
 - [ ] docs / Builder Protocol files
 - [ ] other
 
@@ -47,7 +46,7 @@ reviewer: <CRITICAL / HIGH / MEDIUM / LOW counts>
 tester:   <pass count / coverage>
 ```
 
-## Security checklist (mandatory for stack_core, hooks, API)
+## Security checklist (mandatory for hooks, generated configs, Server Scripts)
 
 - [ ] No `ignore_permissions=True`
 - [ ] No `allow_guest=True` without explicit security review

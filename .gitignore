@@ -35,7 +35,7 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Frappe / bench (when stack_core lands in Phase 2)
+# Frappe / bench (when working against a local bench)
 sites/
 private/
 public/

@@ -20,7 +20,7 @@ False positives are worse than missed nudges. The patterns are conservative.
 | Real Aadhaar (12-digit `nnnn nnnn nnnn`) | Real PII in prompts is forbidden. Use `<aadhaar>` placeholder. |
 | Real PAN (`AAAAA9999A`) | Real PII in prompts is forbidden. Use `<pan>` placeholder. |
 | Real Indian mobile (10-digit starting 6-9) | Real PII in prompts is forbidden. Use `<phone>` placeholder. |
-| `DROP TABLE` / `TRUNCATE TABLE` | Hard-delete on stack_core data is policy-blocked. |
+| `DROP TABLE` / `TRUNCATE TABLE` | Hard-delete is policy-blocked. Use status flags for soft-delete on user data. |
 | "force merge" / "bypass review" / "skip review" | Reviewer + tester are non-negotiable. |
 | `git push --force <branch>` to main / master / develop / release | Refused for protected branches. |
 

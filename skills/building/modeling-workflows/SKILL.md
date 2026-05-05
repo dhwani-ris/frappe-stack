@@ -1,11 +1,11 @@
 ---
 name: modeling-workflows
-description: Use when a PM asks to add an approval flow, status transitions, multi-stage review, or any process with states. Walks them through states, transitions, roles, and emits a Stack Workflow Def payload. Triggers on phrases like "needs approval", "multi-step", "submit for review", "workflow", "status changes".
+description: Use when a PM asks to add an approval flow, status transitions, multi-stage review, or any process with states. Walks them through states, transitions, roles, and emits a Frappe Workflow JSON payload posted via stock REST. Triggers on phrases like "needs approval", "multi-step", "submit for review", "workflow", "status changes".
 ---
 
 # Modeling workflows
 
-Frappe Workflow + the stack_core extension for A/B experiments. PMs describe a process; the engineer turns it into a validated workflow definition.
+Frappe's built-in Workflow plus a small A/B extension that the plugin builds out of stock primitives (Custom Field + Server Script + a regular Experiment Assignment DocType). PMs describe a process; the engineer turns it into a validated workflow definition.
 
 ## Conversation flow
 
@@ -37,7 +37,7 @@ If any fail, refuse the build call and explain which check tripped.
 
 ### Step 5. Show, then build
 
-Same pattern as designing-forms — render the full payload, get explicit confirmation, then call `stack_core.api.workflow_builder.build`.
+Same pattern as designing-forms — render the full payload, get explicit confirmation, then `POST /api/resource/Workflow`.
 
 ## Worked example (linear approval)
 

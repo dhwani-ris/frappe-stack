@@ -4,7 +4,7 @@
 
 | Command | What it does | Refuses on |
 |---|---|---|
-| [`/frappe-stack:init`](../commands/init.md) | Bootstrap on a site: install `stack_core`, configure API key, register staging+prod sites. Idempotent. | Frappe < v15, install failure, adding `--prod` before staging is configured |
+| [`/frappe-stack:init`](../commands/init.md) | Configure the plugin to talk to your Frappe site: store API key/secret in OS keychain, register staging and production sites, point at your local config-repo checkout. Idempotent. | Frappe < v15, adding `--prod` before staging is configured |
 | [`/frappe-stack:build`](../commands/build.md) | Build a DocType / Workflow / Dashboard / Report / Custom Field / Property Setter via the engineer agent. | `is_production=1`, reserved names, elevated fieldtypes without role, workflows without terminal state |
 | [`/frappe-stack:pull`](../commands/pull.md) | Site → git: write per-blueprint JSONs to the config-repo working tree. No commit by default. | Working tree conflicts, network error, unconfigured `config_repo_local_path` |
 | [`/frappe-stack:push`](../commands/push.md) | Git → site (staging only). Idempotent. | `--site=prod` (always refused), uncommitted working tree, blueprint guardrail failure |

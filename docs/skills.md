@@ -75,7 +75,7 @@ sequenceDiagram
     actor PM
     participant Hook as prompt hook
     participant Eng as engineer
-    participant API as stack_core API
+    participant API as Frappe REST
     participant Auto as tester + reviewer
 
     PM->>Hook: build a beneficiary registration<br>with three approval levels
@@ -84,9 +84,9 @@ sequenceDiagram
     Note right of Eng: walks 4-step form flow
     Eng->>Eng: load modeling-workflows skill
     Note right of Eng: walks 5-step workflow flow
-    Eng->>API: stack_core.api.doctype_builder.build
-    Eng->>API: stack_core.api.workflow_builder.build
-    API-->>Eng: both audited and Applied
+    Eng->>API: POST /api/resource/DocType
+    Eng->>API: POST /api/resource/Workflow
+    API-->>Eng: both 201 Created
     Eng->>Auto: spawn in parallel
     Auto-->>PM: ready to /pull or /promote
 ```

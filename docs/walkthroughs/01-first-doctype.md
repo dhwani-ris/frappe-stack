@@ -48,7 +48,7 @@ Read it. Especially check `permissions` and `fields`. If something's wrong, say 
 
 ## Step 4 — Confirm
 
-Say `yes`. The engineer calls `stack_core.api.doctype_builder.build`. Within seconds:
+Say `yes`. The engineer calls Frappe's stock REST: `POST /api/resource/DocType`. Within seconds:
 
 ```text
 Blueprint Beneficiary applied (status=Applied).

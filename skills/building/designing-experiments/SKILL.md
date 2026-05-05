@@ -5,7 +5,7 @@ description: Use when a PM wants to A/B-test a workflow path, compare approval r
 
 # Designing experiments (A/B in workflows)
 
-stack_core extends Frappe Workflow with **split states**. Documents are deterministically routed into one of two arms; outcomes are tracked; once a winner is clear, the losing arm is stripped via `/frappe-stack:experiment promote`.
+The plugin extends Frappe's built-in Workflow with **split states** using stock primitives — a Custom Field on the target DocType, a Server Script that hashes (experiment_id || doc.name) to deterministically assign an arm, and a regular `Experiment Assignment` DocType for tracking. Once a winner is clear, the losing arm is stripped via `/frappe-stack:experiment promote`.
 
 ## When this is the right tool
 

@@ -105,7 +105,6 @@ nav:
       - Commands: commands.md
       - Hooks: hooks.md
   - Operators:
-      - Installing stack_core: operators/installing-stack-core.md
       - Rotating keys: operators/rotating-keys.md
   - Project:
       - PRD: PRD.md

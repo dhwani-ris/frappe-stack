@@ -10,7 +10,7 @@ import sys
 BLOCKED = [
     (re.compile(r"\bignore_permissions\s*=\s*True\b"),
      "ignore_permissions=True bypasses the entire Frappe permission model. "
-     "If this is justified, route through stack_core.api._decorators (audit-logged)."),
+     "If this is justified, document why in a comment and have a reviewer approve in the PR."),
     (re.compile(r"@frappe\.whitelist\s*\(\s*allow_guest\s*=\s*True"),
      "allow_guest=True on a whitelisted method requires explicit security review. "
      "Default to allow_guest=False; if you need public access, route through a "

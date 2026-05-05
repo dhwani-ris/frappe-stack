@@ -111,7 +111,7 @@ Hooks **cannot be bypassed by the user** through the CLI. They run inside Claude
 
 The same guardrail often appears at multiple layers:
 
-| Guardrail | UserPromptSubmit | PreToolUse | stack_core API | CI / PR |
+| Guardrail | UserPromptSubmit | PreToolUse | Frappe REST | CI / PR |
 |---|---|---|---|---|
 | `ignore_permissions=True` | nudge | block | (refuses if blueprint requests it) | semgrep |
 | `allow_guest=True` | nudge | block | n/a | semgrep |

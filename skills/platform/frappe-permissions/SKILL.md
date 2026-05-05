@@ -52,7 +52,8 @@ def do_thing(name: str) -> dict:
     name = frappe.utils.cstr(name)
 
     # 3. Use frappe.qb or parameterized SQL. Never f-strings.
-    # 4. Wrap mutations in audit-log decorator (stack_core does this for us).
+    # 4. Append a row to the local audit log (.frappe-stack/audit.jsonl)
+    #    after success — the plugin handles this automatically.
     ...
 ```
 

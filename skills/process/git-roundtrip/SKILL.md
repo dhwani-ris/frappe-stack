@@ -102,7 +102,7 @@ When `/frappe-stack:diff` shows `changed: ["Beneficiary"]`:
 | Failure | What happens |
 |---|---|
 | `gh` CLI not installed | `pr_opener.py` falls back to GitHub REST API |
-| GitHub token absent | Raises `RuntimeError` — operator must configure `stack_core.github_token_secret_key` |
+| GitHub token absent | Raises `RuntimeError` — user must configure GitHub token via `gh auth login` or `/frappe-stack:init` |
 | Working tree dirty before push | committer.py refuses; surfaces existing changes for the user to commit/stash first |
 | Network down during commit | committer.py commits locally; push fails; can be retried |
 | Schema migration needed (DocType field added) | applier writes blueprint; framework runs schema migration on save; if migration fails, blueprint marked Failed and rolled back |

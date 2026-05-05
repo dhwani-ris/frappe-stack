@@ -1,11 +1,11 @@
 ---
 name: designing-forms
-description: Use when a PM asks to create a new form, registration, intake, application, or DocType. Walks them through fields, validation, and permissions, then emits a Stack Blueprint payload for the build_doctype API. Triggers on phrases like "I need a form for…", "let's add a registration", "create a new doctype for…", "intake form", "application form".
+description: Use when a PM asks to create a new form, registration, intake, application, or DocType. Walks them through fields, validation, and permissions, then emits a Frappe DocType JSON payload posted via stock REST. Triggers on phrases like "I need a form for…", "let's add a registration", "create a new doctype for…", "intake form", "application form".
 ---
 
 # Designing forms (DocTypes)
 
-The PM's most common ask. This skill turns plain-language intent into a validated `Stack Blueprint` payload that `stack_core.api.doctype_builder.build` will materialize.
+The PM's most common ask. This skill turns plain-language intent into a validated DocType JSON payload that the engineer agent posts to Frappe via `POST /api/resource/DocType`.
 
 ## Conversation flow (do not skip steps)
 
@@ -55,10 +55,10 @@ If the PM mentions "field officers" or any tier of restricted access, either:
 Render the full blueprint payload as JSON, formatted, with every field annotated. Ask for confirmation. **Only after explicit "yes"**, call:
 
 ```text
-stack_core.api.doctype_builder.build(
-    blueprint_name="<DocType Name>",
-    payload=<the-json>
-)
+curl -X POST <staging>/api/resource/DocType \
+     -H "Authorization: token <api_key>:<api_secret>" \
+     -H "Content-Type: application/json" \
+     -d '<the-json>'
 ```
 
 ## Worked example

@@ -14,16 +14,19 @@ description: Use when calling Frappe APIs from outside (the plugin), or designin
 - Both halves required; missing secret = 403.
 - Token inherits all the User's roles + permissions — there is no separate "service account" abstraction.
 
-For the `frappe-stack` plugin: create a dedicated `Stack Author` role and a dedicated User per environment (staging vs prod). Never reuse a human's token for the plugin.
+For the `frappe-stack` plugin: create a dedicated user per environment (staging vs prod) with `System Manager` and any other roles needed for the resource types you'll create. Never reuse a human's token for the plugin.
 
 ```http
-POST /api/method/stack_core.api.doctype_builder.build
+POST /api/resource/DocType
 Authorization: token a1b2c3d4:secret_xyz
 Content-Type: application/json
 
 {
-  "blueprint_name": "Beneficiary",
-  "payload": "{...}"
+  "name": "Beneficiary",
+  "module": "Custom",
+  "custom": 1,
+  "fields": [...],
+  "permissions": [...]
 }
 ```
 
@@ -68,7 +71,7 @@ Configure in `site_config.json`:
 }
 ```
 
-Plus per-endpoint limits in the route handler when the default is too lenient. Mutating endpoints under stack_core: 10/minute is enough.
+Plus per-endpoint limits in the route handler when the default is too lenient.
 
 ## CORS
 
@@ -95,10 +98,12 @@ def custom_response(response, exception):
     return frappe.utils.response.report_error(http_status_code=500)
 ```
 
-## What stack_core does for you
+## What the plugin does for you
 
-- Every endpoint is decorated with `@audited` — writes a Stack Audit Log row regardless of success/failure.
-- Every endpoint refuses on `is_production=1` sites — direct API writes blocked, only `bench migrate` may mutate.
-- Every endpoint runs guardrail validators (schema + reserved-name + fieldtype whitelist + workflow shape) before mutation.
+The plugin works with stock Frappe — no custom server-side endpoints. It still adds value at the client side:
 
-Don't reimplement these in your own endpoints — call into `stack_core.api._decorators.audited` and `stack_core.guardrails.*`.
+- Validators (schema + reserved-name + fieldtype whitelist + workflow shape) run before any REST call. Bad inputs never reach Frappe.
+- Refuses to call any site flagged `is_production=true` in `.frappe-stack/config.json`. Production goes through `/frappe-stack:promote` only.
+- Every Bash / Edit / Write done by the plugin appends a JSONL row to `.frappe-stack/audit.jsonl`. Frappe's built-in Activity Log captures the server-side mutation independently.
+
+If you're writing a new Server Script that lives on the Frappe site, follow the secure-endpoint template above — `frappe.has_permission` first, parameterized SQL, no `ignore_permissions=True`.

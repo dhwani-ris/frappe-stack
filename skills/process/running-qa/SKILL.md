@@ -12,7 +12,6 @@ After every `/frappe-stack:build` (or chain of builds), QA must run before the c
 Per `~/.claude/rules/frappe/frappe-testing.md`:
 
 ```bash
-bench --site staging run-tests --app stack_core --coverage
 bench --site staging run-tests --app <user-app> --coverage
 ```
 
