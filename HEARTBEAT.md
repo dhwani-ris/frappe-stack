@@ -4,6 +4,47 @@
 
 ---
 
+## 2026-05-05 — D-10: plugin-only refactor (drop apps/stack_core)
+
+**State:** the plugin now uses Frappe's stock REST API. No custom Frappe app. Nothing to install on the Frappe site beyond what stock Frappe v15+ already ships.
+
+### Why
+
+The original ask was "a Claude plugin that calls Frappe with an API key." `stack_core` was over-engineering for v0.1 — server-side enforcement of patterns the plugin already validates client-side, plus a parallel audit log when Frappe's built-in Activity Log already captures the same events.
+
+### What was removed
+
+- `apps/stack_core/` — entire Frappe app (~30 files): 4 DocTypes, 6 API endpoints, 5 guardrail validators, 5 git-bridge modules, 5 test modules, hooks.py.
+- `docs/operators/installing-stack-core.md`.
+
+### What was reframed
+
+- All agents (engineer, deployer, reviewer, tester) now call `POST /api/resource/<DocType>` instead of `stack_core.api.*`.
+- All slash commands (`init`, `build`, `pull`, `push`, `diff`, `promote`, `experiment`) updated.
+- All skills with code examples updated.
+- All catalog pages (`docs/skills.md`, `docs/commands.md`, `docs/hooks.md`, `docs/architecture.md`).
+- Two hook scripts (`coach_user_prompt`, `block_ignore_permissions`) updated.
+- Builder Protocol files (PRD, SECURITY, CLAUDE, CONTRIBUTING) updated.
+- Operator runbook trimmed to just `rotating-keys.md`.
+
+### What stays the same
+
+- Skills, agents, slash commands, hooks (their roles).
+- A/B experiments, but built from stock primitives — Custom Field + Server Script + a regular `Experiment Assignment` DocType, created on demand via `POST /api/resource`.
+- Validators (schema, reserved-name, fieldtype whitelist, workflow shape) — same logic, runs client-side now.
+- Local audit log at `.frappe-stack/audit.jsonl`.
+- B+ hybrid sync model (D-01) and the `/promote` PR flow.
+
+### Architecture is now
+
+1. Claude Code on PM's machine (the plugin)
+2. Stock Frappe v15+ site (token auth, REST API)
+3. GitHub config repo (per-blueprint JSONs, PR-protected `main`)
+
+Three commits delivered the refactor: `618c89d` (delete + structural docs), `d57bc6c` (agents + commands), `4b6ed60` (skills + catalogs + hooks). This commit closes out the Builder Protocol files.
+
+---
+
 ## 2026-05-05 — GitHub Pages site (MkDocs Material)
 
 **State:** docs site config + GitHub Action landed. Pages will deploy automatically on push to `main` once Pages is enabled in the repo settings.

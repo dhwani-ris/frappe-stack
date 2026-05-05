@@ -7,6 +7,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Removed (D-10 plugin-only refactor — 2026-05-05)
+
+- `apps/stack_core/` — the entire Frappe support app (~30 files) is gone. The plugin now uses Frappe's stock REST API (`POST /api/resource/DocType`, `POST /api/resource/Workflow`, etc.) with token authentication. Nothing custom-installed on the Frappe site.
+- `docs/operators/installing-stack-core.md` — no longer relevant; the plugin install is two slash commands, not a `bench install-app`.
+- `Stack Audit Log` and `Stack Blueprint` and `Stack Workflow Def` DocTypes — replaced by Frappe's built-in Activity Log + the local `.frappe-stack/audit.jsonl`. `Experiment Assignment` is now a regular DocType created on demand by `/frappe-stack:experiment define` via stock REST.
+
+### Changed
+
+- All agents, slash commands, skills, catalog pages, hook scripts, and Builder Protocol files reframed to call stock Frappe REST instead of `stack_core.api.*`. Validators and audit logging happen client-side in the plugin; Frappe's permission system and Activity Log handle the server side.
+- D-10 added and confirmed: plugin-only architecture; the original Phase 2/7 deliverables (the `stack_core` Frappe app and its git_bridge module) are superseded.
+
 ### Added (Phase 0 — 2026-05-01)
 
 - Initial Builder Protocol docs: `README.md`, `PRD.md`, `PLAN.md`, `SECURITY.md`, `CLAUDE.md`, `HEARTBEAT.md`.

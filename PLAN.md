@@ -15,6 +15,7 @@
 | D-07 | A/B in workflows — scope for v0.1 | binary split only (no n-arm); deterministic by `hash(doc.name)` | Product | confirmed 2026-05-03 |
 | D-08 | Audit log retention | append-only, no purge; archive after 365 days | Compliance | confirmed 2026-05-03 |
 | D-09 | infra/ (Docker, CI, pre-commit) | **deferred to post-v0.1** | Product | confirmed |
+| D-10 | Plugin-only architecture (drop `apps/stack_core/`); use stock Frappe REST instead of custom server-side endpoints | **plugin-only** | Product | confirmed 2026-05-05 |
 
 ## 1. Architecture overview
 

@@ -1,6 +1,6 @@
 # Contributing to frappe-stack
 
-Thanks for considering a contribution. This is a Claude Code plugin + a Frappe support app, so contributions span markdown (skills / agents / commands / docs), JSON (hooks / DocType definitions / fixtures), and Python (`stack_core`).
+Thanks for considering a contribution. This is a Claude Code plugin, so contributions span markdown (skills / agents / commands / docs), JSON (hooks / config schemas), and small Python (the hook scripts under `.claude-plugin/hook_scripts/`).
 
 ## Quick orientation
 
@@ -17,8 +17,8 @@ Read these in order:
 - **Conventional commits**: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`. Body explains *why*, not *what*.
 - **One logical change per commit / PR.** Don't bundle phases, don't mix unrelated fixes.
 - **No skipping hooks** (`--no-verify`) and no force-pushing protected branches.
-- **Tests come first** for `stack_core` Python — RED → GREEN → REFACTOR. Coverage gate ≥ 80% on changed lines.
-- **Security review** is mandatory for anything touching `apps/stack_core/api/`, `hooks/`, `.claude-plugin/hook_scripts/`, or any Frappe permission code. Use the `security-reviewer` agent or tag `@security-rotation`.
+- **Tests come first** for any non-trivial Python in the plugin (hook scripts especially) — RED → GREEN → REFACTOR.
+- **Security review** is mandatory for anything touching `hooks/`, `.claude-plugin/hook_scripts/`, agents that issue REST calls, or skills that generate code. Use the `security-reviewer` agent or tag `@security-rotation`.
 - **Don't bypass `SECURITY.md` non-negotiables.** No `ignore_permissions=True`, no `allow_guest=True` without review, no f-string SQL, no hardcoded role checks, no hardcoded credentials.
 
 ## Setting up to contribute
@@ -26,7 +26,7 @@ Read these in order:
 ### Prerequisites
 
 - Claude Code (for testing the plugin)
-- Frappe v15+ bench (for testing `stack_core`)
+- A Frappe v15+ site (any stock install — for end-to-end smoke tests of slash commands)
 - Python 3.10+
 - Node 18+ (only for Playwright E2E)
 - `gh` CLI (for `pr_opener.py` smoke tests)
@@ -36,14 +36,6 @@ Read these in order:
 ```bash
 git clone https://github.com/dhwani-ris/frappe-stack.git
 cd frappe-stack
-```
-
-For `stack_core`:
-
-```bash
-cd /path/to/frappe-bench
-bench get-app stack_core /path/to/frappe-stack/apps/stack_core
-bench --site test_site install-app stack_core
 ```
 
 For the plugin (in Claude Code):
@@ -110,14 +102,13 @@ Hooks are security-sensitive. Triple-check before opening the PR.
 5. Add a row to [`docs/hooks.md`](./docs/hooks.md).
 6. Open a PR with the `hook` and `security` labels — security review mandatory.
 
-### Adding a `stack_core` feature
+### Adding a hook script
 
-1. Open an issue first to discuss the design.
-2. Write tests first (`apps/stack_core/stack_core/<module>/test_<name>.py`).
-3. Run `bench --site test_site run-tests --app stack_core --coverage` — must be ≥ 80% on changed lines.
-4. Run `bench --site test_site run-tests --app stack_core` against `frappe-semgrep-rules` (no CRITICAL / HIGH).
-5. Update relevant docs (`docs/architecture.md` if data flow changes, `docs/skills.md` if skill behavior changes).
-6. Open a PR with the `stack_core` label.
+1. Open an issue first to discuss the design — hook changes are security-sensitive.
+2. Write tests first under `tests/hooks/test_<name>.py`. Prove the hook fires on the bad input and approves the good input.
+3. Add the entry to `hooks/hooks.json`.
+4. Update `docs/hooks.md` with the new row.
+5. Open a PR with the `hook` and `security` labels.
 
 ### Fixing a bug
 

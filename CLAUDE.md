@@ -99,7 +99,7 @@ frappe-stack/
 ├── agents/                 (Phase 4)
 ├── commands/               (Phase 5)
 ├── hooks/                  (Phase 6)
-├── apps/stack_core/        (Phase 2 — Frappe support app)
+(no apps/ — the plugin uses stock Frappe via REST; D-10 confirmed)
 └── docs/                   (Phase 9)
 ```
 

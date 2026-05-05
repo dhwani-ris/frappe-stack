@@ -1,6 +1,6 @@
 # SECURITY — frappe-stack
 
-> Threat model and non-negotiable guardrails. Every line below is enforced at one of three layers: **plugin hook** (PreToolUse, blocks at typing), **`stack_core` validator** (blocks at API), or **CI/PR check** (blocks at merge). When all three exist, all three must pass.
+> Threat model and non-negotiable guardrails. Every line below is enforced at one of two layers: **plugin hook** (UserPromptSubmit / PreToolUse — blocks at typing or pre-tool-call), or **CI/PR check** (blocks at merge). The plugin runs entirely on the PM's machine; stock Frappe sits behind it. When both layers exist, both must pass.
 
 ## 1. Trust model
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | PM using plugin in Claude Code | Authenticated to staging via API key, **no prod write access** | Bad blueprint on staging — caught at `/fs-promote` review |
 | Developer reviewing PR | Trusted to read & approve | Bad merge → caught by CI semgrep + tests |
-| `stack_core` admin | Full | Compromise = full takeover. Treat the API key as a production secret. |
+| Frappe API user (used by the plugin) | Inherits the user's roles on the Frappe site | Compromise = full takeover at the level of that user's roles. Treat the API key + secret as production secrets stored in OS keychain. |
 | Anonymous internet | Untrusted | Must never reach mutating endpoints (`allow_guest=False` enforced). |
 
 ## 2. Non-negotiable guardrails
@@ -26,24 +26,25 @@
 | `git push --force` to `main` / `develop` / `release/*` | any shell command suggested by plugin | History rewrite |
 | `.env`, credentials, API keys in commit | pre-commit secret scan | Credential leak |
 | Direct API call to **production** site from `/fs-build`, `/fs-push` | plugin hook | Prod is git-only |
-| Hard delete of govt / audit-tagged DocType row | `stack_core` validator | Compliance — no purge |
+| Hard delete of govt / audit-tagged DocType row | UserPromptSubmit block + Frappe permission system | Compliance — no purge |
 
 ### 2.2 Required patterns (refused if absent)
 
 | Requirement | Where checked |
 |---|---|
 | Every `@frappe.whitelist()` calls `frappe.has_permission()` or `doc.check_permission()` before mutation | semgrep |
-| Every blueprint mutation writes a `stack_audit_log` row | `stack_core` API decorator |
-| Every PII fieldtype (Aadhaar / PAN / phone / email when tagged sensitive) is encrypted at rest via Fernet | `stack_core` field validator |
-| Every workflow state has at least one role assigned | `stack_core` workflow validator |
-| Every workflow has at least one terminal state reachable from initial | `stack_core` workflow validator |
-| Every DocType creation passes a JSON-Schema validation against the blueprint schema | `stack_core` API |
-| Every DocType name is checked against the reserved-name list (Frappe core DocTypes) | `stack_core` API |
-| Every fieldtype is in the whitelist; `Code` / `Password` / `Attach` / `Long Text` require elevated role | `stack_core` API |
+| Every plugin tool call appends to local `.frappe-stack/audit.jsonl` | PostToolUse hook |
+| Every server-side Frappe mutation lands in Frappe's built-in Activity Log | Frappe core (automatic) |
+| Every PII fieldtype (Aadhaar / PAN / phone / email when tagged sensitive) is masked in the plugin's output | Plugin display layer |
+| Every workflow state has at least one role assigned | Plugin workflow validator (client-side, runs before REST call) |
+| Every workflow has at least one terminal state reachable from initial | Plugin workflow validator |
+| Every DocType payload passes JSON-Schema validation before the REST call | Plugin schema validator |
+| Every DocType name is checked against the reserved-name list (Frappe core DocTypes) | Plugin reserved-name check |
+| Every fieldtype is in the whitelist; `Code` / `Password` / `Attach` / `Long Text` require elevated role | Plugin fieldtype whitelist |
 
 ## 3. Layer enforcement matrix
 
-| Guardrail | Plugin hook (PreToolUse) | stack_core API | CI / PR check |
+| Guardrail | Plugin hook (PreToolUse) | Plugin client-side validator | CI / PR check |
 |---|---|---|---|
 | `ignore_permissions=True` | ✓ scan generated code | ✓ refuse if blueprint requests it | ✓ semgrep |
 | `allow_guest=True` | ✓ scan generated code | n/a | ✓ semgrep |
@@ -69,7 +70,7 @@ Before pointing `/fs-promote` at a real production site:
 □ HTTPS enforced with valid SSL
 □ Two-factor auth required for System Manager + Stack Admin roles
 □ Failed-login lockout: 5 attempts
-□ stack_core API key stored in secret manager, not site_config plain
+□ Frappe API key + secret stored in OS keychain, not in `.frappe-stack/config.json` plain
 □ Backup verified (restore test within last 30 days)
 □ stack_audit_log retention policy set (no purge — archive only)
 ```
@@ -81,7 +82,7 @@ If the plugin is suspected of generating insecure code:
 1. **Stop pushing.** Hold all pending `/fs-promote` PRs.
 2. **Capture evidence** — the Claude Code transcript, the generated blueprint JSON, the audit log row.
 3. **Notify** the security owner listed in `CLAUDE.md`.
-4. **Rotate** the `stack_core` API key.
+4. **Rotate** the Frappe API key + secret (regenerate via Frappe Desk → User → API Access).
 5. **Patch the hook / validator** that should have caught it. Add a regression test.
 6. **Backfill** — re-run the new check against existing fixtures. Open cleanup PRs for any hits.
 

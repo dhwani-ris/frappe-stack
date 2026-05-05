@@ -34,42 +34,44 @@ Jobs:
 ### Tertiary: Director / Compliance
 
 Jobs:
-- Audit every change via git history + the on-site audit log DocType.
+- Audit every change via git history + Frappe's built-in Activity Log + the local `.frappe-stack/audit.jsonl` on PM machines.
 - Confirm no PII bypass, no `ignore_permissions=True`, no hard deletes.
 
 ## 3. Solution shape
 
-### 3.1 Two layers
+### 3.1 One layer
 
-1. **The Claude Code plugin (`frappe-stack`)** — slash commands, skills, agents, hooks. PM types intent; plugin generates correct config.
-2. **The Frappe support app (`stack_core`)** — API surface the plugin calls, audit log, blueprint storage, git-bridge engine. Installed on every Frappe site that uses this stack.
+**The Claude Code plugin (`frappe-stack`)** — slash commands, skills, agents, safety hooks. PM types intent; plugin generates correct config and POSTs it to Frappe's stock REST API. Nothing custom-installed on the Frappe site (D-10 confirmed 2026-05-05).
 
-### 3.2 Sync model — B+ hybrid (default decision)
+The plugin still includes the four `Experiment Assignment`, A/B Custom Field, and Server Script primitives — but those are **created on demand via stock `POST /api/resource`**, the first time you run `/frappe-stack:experiment define`. They are normal Frappe DocTypes / Custom Fields / Server Scripts, not a custom Frappe app.
+
+### 3.2 Sync model — B+ hybrid (D-01 confirmed)
 
 ```
-Staging site                    GitHub                   Production site
-──────────────                  ──────                  ─────────────────
-[ PM uses plugin ]              (config repo)           [ no direct API   ]
-       │                            │                   [ writes allowed  ]
-       ↓ /fs-build                  │                            ↑
-  API call to stack_core            │                            │
-       │                            │                       bench migrate
-       ↓                            │                            ↑
-  site mutates                      │                            │
-       │                            │                            │
-       ↓ post-hook                  │                            │
-  export fixtures                   │                            │
-       │                            │                            │
-       └─── /fs-promote ────→ open PR ────→ review/merge ────────┘
+Staging site (stock Frappe v15+)        GitHub config repo    Production site
+─────────────────────────────────       ──────────────────    ────────────────
+[ PM types in Claude Code ]                                    [ accepts changes
+       │                                                         only via PR    ]
+       ↓ /frappe-stack:build                                     [ merge → CI    ]
+  POST /api/resource/<DocType>          (versioned JSON          [ runs bench    ]
+       │                                 per blueprint)          [ migrate       ]
+       ↓                                                                ↑
+  site mutates via stock REST                                            │
+       │                                                                 │
+       ↓ /frappe-stack:pull                                              │
+  per-blueprint JSONs written to                                         │
+  local config-repo working tree                                         │
+       │                                                                 │
+       └─── /frappe-stack:promote ────→ open PR ────→ review/merge ──────┘
 ```
 
-- Staging is the playground — fast iteration, instant feedback.
+- Staging is the playground — fast iteration via stock REST.
 - Production is git-only — the audit trail *is* git history.
-- `/fs-promote` is the bridge: snapshots staging fixtures, opens a PR, lets a reviewer approve, merges, triggers prod migrate.
+- `/frappe-stack:promote` is the bridge: snapshots staging via stock REST, writes per-blueprint JSONs to the config repo, opens a PR, lets a reviewer approve, merges, triggers prod migrate via the operator's existing CI/CD.
 
 ### 3.3 A/B experiments in workflows
 
-A new **Split state** in Frappe Workflow with deterministic traffic assignment by `hash(doc.name)`. Tracked in a dedicated `Experiment Assignment` DocType. Promotable via `/fs-experiment promote arm_a`, which strips the losing arm from the blueprint and opens a PR.
+A **split state** in Frappe Workflow with deterministic traffic assignment by `hash(experiment_id || doc.name)`. Implemented as stock primitives — Custom Field on the target DocType, Server Script on workflow state-change, regular `Experiment Assignment` DocType for tracking. Created by `/frappe-stack:experiment define` via `POST /api/resource/...`. Promotable via `/frappe-stack:experiment promote arm_a`, which strips the losing arm from the workflow JSON and opens a PR.
 
 Full spec in `PLAN.md §8`.
 
