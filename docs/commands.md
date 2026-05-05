@@ -16,32 +16,37 @@
 
 ## Typical flow
 
-```
-/frappe-stack:init https://staging.example.com
-                      │
-                      ▼
-/frappe-stack:build doctype Beneficiary
-                      │
-                      ▼
-/frappe-stack:build workflow "Beneficiary Approval"
-                      │
-                      ▼
-/frappe-stack:build dashboard "Beneficiary Operations"
-                      │
-                      ▼
-/frappe-stack:review --since=origin/main
-                      │
-                      ▼
-/frappe-stack:diff
-                      │
-                      ▼
-/frappe-stack:promote
-                      │
-                      ▼
-                 (PR review + merge + CI migrate)
-                      │
-                      ▼
-/frappe-stack:ship v0.1.0
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#F5E6DD',
+    'primaryTextColor': '#2E2E2E',
+    'primaryBorderColor': '#8B1E24',
+    'lineColor': '#9E2A2F',
+    'secondaryColor': '#E7C1AD',
+    'tertiaryColor': '#ffffff',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '14px'
+  }
+}}%%
+flowchart TD
+    A["/frappe-stack:init"]
+    B["/frappe-stack:build doctype Beneficiary"]
+    C["/frappe-stack:build workflow Beneficiary Approval"]
+    D["/frappe-stack:build dashboard Beneficiary Operations"]
+    E["/frappe-stack:review"]
+    F["/frappe-stack:diff"]
+    G["/frappe-stack:promote"]
+    H{{"PR review + merge + CI migrate"}}
+    I["/frappe-stack:ship v0.1.0"]
+
+    A --> B --> C --> D --> E --> F --> G --> H --> I
+
+    classDef step fill:#F5E6DD,stroke:#8B1E24,stroke-width:1.5px,color:#2E2E2E,rx:10,ry:10
+    classDef gate fill:#F28C38,stroke:#9E2A2F,stroke-width:1.5px,color:#ffffff
+    class A,B,C,D,E,F,G,I step
+    class H gate
 ```
 
 ## Commands grouped by purpose

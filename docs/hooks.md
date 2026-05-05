@@ -4,33 +4,47 @@
 
 ## Lifecycle layout
 
-```
-User types something
-         │
-         ▼
-   UserPromptSubmit ─── coach_user_prompt.py    (block PII / coach vague asks)
-         │
-         ▼
-Claude formulates response, picks tools
-         │
-         ▼
-   PreToolUse ─────── block_dangerous_bash.py        (Bash matcher)
-                  ├── block_direct_prod_api.py        (Bash + WebFetch)
-                  ├── block_ignore_permissions.py     (Edit + Write)
-                  ├── block_credential_leak.py        (Edit + Write)
-                  └── block_fstring_sql.py            (Edit + Write)
-         │
-         ▼
-Tool runs
-         │
-         ▼
-   PostToolUse ────── audit_local.py             (Bash + Edit + Write)
-         │
-         ▼
-Session ends
-         │
-         ▼
-   Stop ───────────── heartbeat_check.py
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#F5E6DD',
+    'primaryTextColor': '#2E2E2E',
+    'primaryBorderColor': '#8B1E24',
+    'lineColor': '#9E2A2F',
+    'secondaryColor': '#E7C1AD',
+    'tertiaryColor': '#ffffff',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '13px'
+  }
+}}%%
+flowchart TD
+    U[User types something]
+    UPS[UserPromptSubmit<br>coach_user_prompt.py]
+    Claude[Claude formulates response,<br>picks tools]
+
+    subgraph PRE["PreToolUse · 5 hooks"]
+        direction LR
+        H1[block_dangerous_bash<br>Bash]
+        H2[block_direct_prod_api<br>Bash + WebFetch]
+        H3[block_ignore_permissions<br>Edit + Write]
+        H4[block_credential_leak<br>Edit + Write]
+        H5[block_fstring_sql<br>Edit + Write]
+    end
+
+    Run[Tool runs]
+    POST[PostToolUse<br>audit_local.py · Bash + Edit + Write]
+    End[Session ends]
+    Stop[Stop<br>heartbeat_check.py]
+
+    U --> UPS --> Claude --> PRE --> Run --> POST --> End --> Stop
+
+    classDef event fill:#F5E6DD,stroke:#8B1E24,stroke-width:1.5px,color:#2E2E2E,rx:10,ry:10
+    classDef plain fill:#ffffff,stroke:#D9B3A0,stroke-width:1px,color:#6B6B6B
+    classDef hook fill:#ffffff,stroke:#F28C38,stroke-width:1px,color:#2E2E2E,rx:8,ry:8
+    class UPS,POST,Stop event
+    class U,Claude,Run,End plain
+    class H1,H2,H3,H4,H5 hook
 ```
 
 ## UserPromptSubmit (1)

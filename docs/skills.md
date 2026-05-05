@@ -50,34 +50,45 @@ PMs don't read these end-to-end; the engineer agent loads the relevant one as ne
 
 ## How a skill fires
 
-```
-PM types:  "let's build a beneficiary registration with three approval levels"
-                                      │
-                                      ▼
-              UserPromptSubmit hook (coach_user_prompt.py)
-                                      │
-              injects: "suggest /frappe-stack:build doctype + workflow"
-                                      │
-                                      ▼
-              Claude routes to /frappe-stack:build doctype Beneficiary
-                                      │
-                                      ▼
-              engineer agent loads skills/building/designing-forms
-                                      │
-                  walks the 4-step conversation flow
-                                      │
-                                      ▼
-              engineer loads skills/building/modeling-workflows
-                                      │
-                  walks the 5-step workflow flow
-                                      │
-                                      ▼
-              calls stack_core.api.doctype_builder.build (audited)
-                                      │
-              calls stack_core.api.workflow_builder.build (audited)
-                                      │
-                                      ▼
-              auto-spawns tester + reviewer (parallel)
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#8B1E24',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#6A2E2E',
+    'lineColor': '#9E2A2F',
+    'secondaryColor': '#F5E6DD',
+    'actorBkg': '#8B1E24',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#6A2E2E',
+    'noteBkgColor': '#F5E6DD',
+    'noteTextColor': '#2E2E2E',
+    'noteBorderColor': '#D9B3A0',
+    'sequenceNumberColor': '#ffffff',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '14px'
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    actor PM
+    participant Hook as prompt hook
+    participant Eng as engineer
+    participant API as stack_core API
+    participant Auto as tester + reviewer
+
+    PM->>Hook: build a beneficiary registration<br>with three approval levels
+    Hook->>Eng: suggest /frappe-stack:build doctype + workflow
+    Eng->>Eng: load designing-forms skill
+    Note right of Eng: walks 4-step form flow
+    Eng->>Eng: load modeling-workflows skill
+    Note right of Eng: walks 5-step workflow flow
+    Eng->>API: stack_core.api.doctype_builder.build
+    Eng->>API: stack_core.api.workflow_builder.build
+    API-->>Eng: both audited and Applied
+    Eng->>Auto: spawn in parallel
+    Auto-->>PM: ready to /pull or /promote
 ```
 
 Each skill is self-contained: trigger phrases in frontmatter, conversation flow in body, anti-patterns at the end. Reading any one of them gives you the full picture for that surface.
