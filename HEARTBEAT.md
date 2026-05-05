@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-05-05 — Public-readiness pass + docs hub
+
+**State:** repo prepared for going public. Documentation hub added; private-repo references removed; contributor surface added.
+
+### Done
+
+- `docs/README.md` — index with how-the-pieces-fit diagram + 5/30-min reading paths.
+- `docs/skills.md` — 17-skill catalog grouped by purpose (building / shipping / organizing / platform / meta).
+- `docs/agents.md` — 8-agent catalog with model rationale + pairing chart.
+- `docs/commands.md` — 9-command catalog with argument hints and typical-flow diagram.
+- `docs/hooks.md` — 8-hook catalog with lifecycle layout and layered-enforcement matrix.
+- `docs/architecture.md` — three-actor diagram, B+ sync model, end-to-end build + promote flows, DocType layout, layered enforcement, failure modes.
+- `README.md` — refreshed: install instructions, quick-links table, what's-in-the-box inventory. Replaced the Phase-0 placeholder framing.
+- `CONTRIBUTING.md` — how to set up dev environment, run tests, propose skills/agents/commands, conventional commits, security disclosure.
+- `.github/ISSUE_TEMPLATE/` — bug, feature, skill proposal templates.
+- `.github/PULL_REQUEST_TEMPLATE.md` — PR template that surfaces reviewer/tester output and security checklist.
+- Removed `prody-dris/mgrant-stack` references from `README.md` + `PRD.md` (private repo; outsiders saw 404s). Replaced with a generic "internal reference" note where appropriate.
+- CHANGELOG updated.
+
+### Why this matters
+
+Up to now, the only way to discover what the plugin shipped was to `ls -R skills/ agents/ commands/`. Reviewers, contributors, and anyone picking up the repo cold had no map. The docs hub makes the surface area inspectable in five minutes. The contributor templates signal "we accept PRs."
+
+---
+
 ## 2026-05-03 — Prompt-coaching layer added
 
 **State:** added a UserPromptSubmit hook that coaches PMs at typing time, before Claude sees the prompt.
