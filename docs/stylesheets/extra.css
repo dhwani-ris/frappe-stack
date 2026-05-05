@@ -1,45 +1,58 @@
 /* frappe-stack docs — custom theme tweaks
-   Brand colors lifted from dhwaniris.com:
-     primary   #811622   deep maroon  (logo + headers)
-     accent    #F58634   saffron orange (CTAs / status pill)
-     secondary #53435B   muted purple (sparing use)
-     warm bg   #f7e2d1   cream (light-mode subtle accents)
-   Goals: clean / minimal / Inter type / generous whitespace,
-   matching the ai-playground-sessions reference aesthetic. */
+   Refined dhwaniris.com brand palette:
+     primary maroon       #8B1E24   (header / banner)
+     heading deep red     #9E2A2F   (h1, h2 emphasis)
+     light peach          #E7C1AD   (warm fills, secondary surfaces)
+     soft beige           #D9B3A0   (gradient stop, table edges)
+     cream                #F5E6DD   (subtle accents, status pill bg)
+     orange CTA           #F28C38   (buttons, links accent)
+     orange hover         #E67E22   (hover state)
+     dark text            #2E2E2E
+     muted text           #6B6B6B
+     logo orange          #F07F2F
+     dark brown (shadow)  #6A2E2E
+   Goals: clean / minimal / Inter type / generous whitespace. */
 
 :root {
-  --md-primary-fg-color: #811622;
-  --md-primary-fg-color--light: #a83849;
-  --md-primary-fg-color--dark: #5c0e18;
-  --md-accent-fg-color: #F58634;
-  --md-accent-fg-color--transparent: rgba(245, 134, 52, 0.1);
+  --md-primary-fg-color: #8B1E24;
+  --md-primary-fg-color--light: #B0353D;
+  --md-primary-fg-color--dark: #6A2E2E;
+  --md-accent-fg-color: #F28C38;
+  --md-accent-fg-color--transparent: rgba(242, 140, 56, 0.1);
 
-  --dhwani-secondary: #53435B;
-  --dhwani-cream: #f7e2d1;
+  --dhwani-heading-red: #9E2A2F;
+  --dhwani-peach: #E7C1AD;
+  --dhwani-beige: #D9B3A0;
+  --dhwani-cream: #F5E6DD;
+  --dhwani-orange-hover: #E67E22;
+  --dhwani-logo-orange: #F07F2F;
+  --dhwani-shadow: #6A2E2E;
+  --dhwani-text: #2E2E2E;
+  --dhwani-muted: #6B6B6B;
 }
 
 [data-md-color-scheme="default"] {
   --md-default-bg-color: #ffffff;
-  --md-default-fg-color: #1a1a1a;
-  --md-default-fg-color--light: #5b5b5b;
-  --md-typeset-color: #1a1a1a;
-  --md-typeset-a-color: #811622;
+  --md-default-fg-color: var(--dhwani-text);
+  --md-default-fg-color--light: var(--dhwani-muted);
+  --md-typeset-color: var(--dhwani-text);
+  --md-typeset-a-color: #8B1E24;
 }
 
 [data-md-color-scheme="slate"] {
-  --md-default-bg-color: #15090b;
-  --md-default-bg-color--light: #1f1014;
+  --md-default-bg-color: #1a0d10;
+  --md-default-bg-color--light: #221318;
   --md-default-fg-color: #f0e6e8;
   --md-default-fg-color--light: #b8a8ac;
   --md-typeset-color: #f0e6e8;
   --md-primary-fg-color: #c44056;
   --md-primary-fg-color--light: #d96978;
-  --md-primary-fg-color--dark: #811622;
-  --md-accent-fg-color: #ffa066;
+  --md-primary-fg-color--dark: #6A2E2E;
+  --md-accent-fg-color: #F28C38;
   --md-typeset-a-color: #d96978;
 }
 
-/* Typography — tighter Inter */
+/* Typography */
 .md-typeset {
   font-size: 0.78rem;
   line-height: 1.6;
@@ -51,6 +64,13 @@
 .md-typeset h3 {
   font-weight: 600;
   letter-spacing: -0.02em;
+  color: var(--dhwani-heading-red);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1,
+[data-md-color-scheme="slate"] .md-typeset h2,
+[data-md-color-scheme="slate"] .md-typeset h3 {
+  color: var(--md-primary-fg-color--light);
 }
 
 .md-typeset h1 {
@@ -59,7 +79,7 @@
   margin-bottom: 0.6em;
 }
 
-/* Header banner — brand maroon, white text */
+/* Header — maroon banner */
 .md-header {
   background: var(--md-primary-fg-color);
   color: #ffffff;
@@ -90,7 +110,7 @@
   color: var(--md-default-fg-color);
 }
 
-/* Tabs sit under the header in the same maroon */
+/* Tabs row */
 .md-tabs {
   background: var(--md-primary-fg-color);
   color: #ffffff;
@@ -157,7 +177,7 @@
 
 /* Tables */
 .md-typeset table:not([class]) {
-  border: 1px solid var(--md-default-fg-color--lightest);
+  border: 1px solid var(--dhwani-beige);
   border-radius: 8px;
   border-collapse: separate;
   border-spacing: 0;
@@ -165,15 +185,9 @@
   font-size: 0.74rem;
 }
 
-.md-typeset table:not([class]) th {
-  background: var(--md-default-bg-color);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
 .md-typeset table:not([class]) th,
 .md-typeset table:not([class]) td {
-  border-top: 1px solid var(--md-default-fg-color--lightest);
+  border-top: 1px solid rgba(217, 179, 160, 0.5);
   padding: 0.6em 0.9em;
 }
 
@@ -181,6 +195,8 @@
   border-top: none;
   background: var(--dhwani-cream);
   color: var(--md-primary-fg-color);
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 [data-md-color-scheme="slate"] .md-typeset table:not([class]) thead th {
@@ -188,10 +204,19 @@
   color: var(--md-primary-fg-color--light);
 }
 
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) {
+  border-color: rgba(106, 46, 46, 0.4);
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td {
+  border-top-color: rgba(106, 46, 46, 0.3);
+}
+
 /* Grid cards */
 .md-typeset .grid.cards > ul > li,
 .md-typeset .grid > .card {
-  border: 1px solid var(--md-default-fg-color--lightest);
+  border: 1px solid var(--dhwani-beige);
   border-radius: 10px;
   padding: 1.1rem 1.2rem;
   transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
@@ -201,7 +226,12 @@
 .md-typeset .grid > .card:hover {
   border-color: var(--md-primary-fg-color);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(129, 22, 34, 0.08);
+  box-shadow: 0 4px 14px rgba(139, 30, 36, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li,
+[data-md-color-scheme="slate"] .md-typeset .grid > .card {
+  border-color: rgba(106, 46, 46, 0.4);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li:hover,
@@ -228,20 +258,24 @@
   font-size: 0.74rem;
 }
 
-/* Footer — minimal */
+/* Footer */
 .md-footer {
   background: var(--md-default-bg-color);
   color: var(--md-default-fg-color--light);
-  border-top: 1px solid var(--md-default-fg-color--lightest);
+  border-top: 1px solid var(--dhwani-beige);
 }
 
 .md-footer-meta {
-  background: var(--md-primary-fg-color--dark);
+  background: var(--dhwani-shadow);
   color: rgba(255, 255, 255, 0.85);
 }
 
 .md-footer-meta a {
   color: var(--md-accent-fg-color);
+}
+
+.md-footer-meta a:hover {
+  color: var(--dhwani-orange-hover);
 }
 
 .md-footer__inner {
@@ -276,8 +310,17 @@
 /* Hero on landing */
 .md-typeset .hero {
   padding: 1.5rem 0 2.5rem;
-  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  border-bottom: 1px solid var(--dhwani-beige);
   margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--dhwani-cream) 0%, transparent 60%);
+  border-radius: 12px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .hero {
+  background: linear-gradient(135deg, rgba(139, 30, 36, 0.15) 0%, transparent 60%);
+  border-color: rgba(106, 46, 46, 0.3);
 }
 
 .md-typeset .hero h1 {
@@ -296,7 +339,7 @@
   max-width: 64ch;
 }
 
-/* Status pill — saffron + cream */
+/* Status pill */
 .md-typeset .status-pill {
   display: inline-block;
   font-size: 0.7rem;
@@ -307,17 +350,17 @@
   border-radius: 999px;
   background: var(--dhwani-cream);
   color: var(--md-primary-fg-color);
-  border: 1px solid rgba(129, 22, 34, 0.15);
+  border: 1px solid rgba(139, 30, 36, 0.15);
   margin-bottom: 1rem;
 }
 
 [data-md-color-scheme="slate"] .md-typeset .status-pill {
-  background: rgba(245, 134, 52, 0.12);
+  background: rgba(242, 140, 56, 0.12);
   color: var(--md-accent-fg-color);
-  border-color: rgba(245, 134, 52, 0.25);
+  border-color: rgba(242, 140, 56, 0.25);
 }
 
-/* Buttons */
+/* Buttons — maroon outline / fill, orange accent on hover */
 .md-typeset .md-button {
   border-color: var(--md-primary-fg-color);
   color: var(--md-primary-fg-color);
@@ -333,25 +376,26 @@
 }
 
 .md-typeset .md-button--primary {
-  background: var(--md-primary-fg-color);
+  background: var(--md-accent-fg-color);
   color: #ffffff;
-  border-color: var(--md-primary-fg-color);
+  border-color: var(--md-accent-fg-color);
 }
 
 .md-typeset .md-button--primary:hover,
 .md-typeset .md-button--primary:focus {
-  background: var(--md-primary-fg-color--dark);
-  border-color: var(--md-primary-fg-color--dark);
+  background: var(--dhwani-orange-hover);
+  border-color: var(--dhwani-orange-hover);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .md-button--primary {
-  background: var(--md-primary-fg-color);
-  border-color: var(--md-primary-fg-color);
+  background: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+  color: #1a0d10;
 }
 
 /* Selection — saffron */
 ::selection {
-  background: rgba(245, 134, 52, 0.35);
+  background: rgba(242, 140, 56, 0.35);
   color: inherit;
 }
 
@@ -360,4 +404,24 @@
 [data-md-color-scheme="default"] .highlight .kn,
 [data-md-color-scheme="default"] .highlight .kr {
   color: var(--md-primary-fg-color);
+}
+
+/* Mermaid diagram container — generous breathing room + soft frame */
+.md-typeset .mermaid {
+  background: var(--dhwani-cream);
+  border: 1px solid var(--dhwani-beige);
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .mermaid {
+  background: rgba(245, 230, 221, 0.05);
+  border-color: rgba(106, 46, 46, 0.3);
+}
+
+.md-typeset .mermaid svg {
+  max-width: 100%;
+  height: auto;
 }
