@@ -5,43 +5,29 @@ How the plugin, the support app, and the GitHub config repo flow together.
 ## The three actors
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#8B1E24',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#6A2E2E',
-    'lineColor': '#9E2A2F',
-    'secondaryColor': '#F5E6DD',
-    'tertiaryColor': '#E7C1AD',
-    'background': '#F5E6DD',
-    'fontFamily': 'Inter, system-ui, sans-serif'
-  }
-}}%%
 flowchart LR
-    subgraph PM["1 · Claude Code (PM's machine)"]
+    subgraph PM["1 · Claude Code on PM machine"]
         direction TB
-        P1["Slash commands<br/>/frappe-stack:*"]
-        P2["Skills loaded by<br/>engineer agent"]
-        P3["Hooks: UserPromptSubmit /<br/>PreToolUse / PostToolUse / Stop"]
-        P4["Local audit log<br/>.frappe-stack/audit.jsonl"]
+        P1["Slash commands<br>/frappe-stack:*"]
+        P2["Skills loaded by<br>engineer agent"]
+        P3["Hooks: prompt / pre-tool /<br>post-tool / stop"]
+        P4["Local audit log<br>.frappe-stack/audit.jsonl"]
     end
 
-    subgraph SITE["2 · Frappe site (staging) + stack_core"]
+    subgraph SITE["2 · Frappe site + stack_core"]
         direction TB
-        S1["DocTypes<br/>Stack Blueprint, Workflow Def,<br/>Experiment Assignment, Audit Log"]
-        S2["API<br/>/api/method/stack_core.api.*"]
-        S3["Guardrails<br/>schema, fieldtype, reserved_names,<br/>workflow, permission_enforcer"]
-        S4["git_bridge<br/>exporter, committer, pr_opener,<br/>differ, applier"]
+        S1["DocTypes: Stack Blueprint,<br>Workflow Def, Experiment<br>Assignment, Audit Log"]
+        S2["API endpoints<br>stack_core.api.*"]
+        S3["Guardrails: schema, fieldtype,<br>reserved names, workflow,<br>permission enforcer"]
+        S4["git_bridge: exporter, committer,<br>pr_opener, differ, applier"]
     end
 
     subgraph GIT["3 · GitHub config repo"]
         direction TB
         G1["fixtures/app/doctypes/*.json"]
         G2["fixtures/app/workflows/*.json"]
-        G3["fixtures/app/{custom_fields,<br/>property_setters}.json"]
-        G4["fixtures/site/&lt;sitename&gt;/<br/>overrides.json"]
-        G5["main protected<br/>→ CI runs bench migrate on prod"]
+        G3["fixtures/site/[sitename]/<br>overrides.json"]
+        G4["main protected, CI runs<br>bench migrate on prod"]
     end
 
     PM ==>|"HTTPS + API key"| SITE
@@ -51,7 +37,7 @@ flowchart LR
     classDef actorBox fill:#F5E6DD,stroke:#8B1E24,stroke-width:2px,color:#2E2E2E
     classDef itemBox fill:#ffffff,stroke:#D9B3A0,stroke-width:1px,color:#2E2E2E
     class PM,SITE,GIT actorBox
-    class P1,P2,P3,P4,S1,S2,S3,S4,G1,G2,G3,G4,G5 itemBox
+    class P1,P2,P3,P4,S1,S2,S3,S4,G1,G2,G3,G4 itemBox
 ```
 
 ## The B+ hybrid sync model (D-01 confirmed)
@@ -69,23 +55,6 @@ flowchart LR
 ## End-to-end build flow
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#8B1E24',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#6A2E2E',
-    'lineColor': '#9E2A2F',
-    'secondaryColor': '#F5E6DD',
-    'actorBkg': '#8B1E24',
-    'actorTextColor': '#ffffff',
-    'actorLineColor': '#6A2E2E',
-    'noteBkgColor': '#F5E6DD',
-    'noteTextColor': '#2E2E2E',
-    'noteBorderColor': '#D9B3A0',
-    'fontFamily': 'Inter, system-ui, sans-serif'
-  }
-}}%%
 sequenceDiagram
     autonumber
     actor PM
@@ -93,98 +62,72 @@ sequenceDiagram
     participant Eng as engineer agent
     participant API as stack_core API
     participant DB as Frappe DB
-    participant Auto as reviewer + tester
+    participant Auto as reviewer plus tester
 
-    PM->>Hook: "make a beneficiary form"
-    Hook->>Eng: routes to /frappe-stack:build doctype
-    Eng->>Eng: loads designing-forms skill<br/>walks fields + permissions
-    Eng->>PM: prints JSON, asks "yes?"
+    PM->>Hook: make a beneficiary form
+    Hook->>Eng: route to /frappe-stack:build doctype
+    Eng->>Eng: load designing-forms skill
+    Eng->>PM: print JSON, ask for confirmation
     PM->>Eng: confirms
-    Eng->>API: POST /api/method/stack_core.api.doctype_builder.build
-    API->>API: permission_check<br/>refuse_on_production<br/>schema + reserved_names + fieldtype validators
+    Eng->>API: POST stack_core.api.doctype_builder.build
+    API->>API: permission check
+    API->>API: refuse_on_production
+    API->>API: schema and reserved-name validators
     API->>DB: upsert Stack Blueprint
     API->>DB: materialize DocType
-    API->>DB: @audited writes log row
-    API-->>Eng: status=Applied
-    Eng->>Auto: spawn reviewer ‖ tester (parallel)
-    Auto-->>PM: "ready to /pull or /promote"
+    API->>DB: audit log row written
+    API-->>Eng: status equals Applied
+    Eng->>Auto: spawn reviewer and tester in parallel
+    Auto-->>PM: ready to /pull or /promote
 ```
 
 ## End-to-end promote flow
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#8B1E24',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#6A2E2E',
-    'lineColor': '#9E2A2F',
-    'secondaryColor': '#F5E6DD',
-    'actorBkg': '#8B1E24',
-    'actorTextColor': '#ffffff',
-    'actorLineColor': '#6A2E2E',
-    'noteBkgColor': '#F5E6DD',
-    'noteTextColor': '#2E2E2E',
-    'noteBorderColor': '#D9B3A0',
-    'fontFamily': 'Inter, system-ui, sans-serif'
-  }
-}}%%
 sequenceDiagram
     autonumber
     actor PM
-    participant Dep as deployer agent
+    participant Dep as deployer
     participant Repo as config repo
     participant GH as GitHub PR
-    participant Reviewer
     participant CI as prod CI
-    participant Prod as Frappe (prod)
+    participant Prod as production site
 
     PM->>Dep: /frappe-stack:promote
-    Dep->>Dep: pre-promote checklist:<br/>diff clean · all Applied · reviewer green ·<br/>tester ≥80% · backup &lt;24h · roles covered ·<br/>not Friday-after-14:00
+    Dep->>Dep: run pre-promote checklist
+    Note right of Dep: diff clean, all Applied,<br>reviewer green, tester at 80% or more,<br>backup recent, roles covered,<br>not Friday afternoon
     Dep->>Repo: exporter writes per-blueprint JSONs
-    Dep->>Repo: committer creates branch + commits
-    Dep->>GH: pr_opener (gh CLI / REST fallback)
-    GH-->>Reviewer: tag rotation
-    Reviewer->>GH: review + approve
-    GH->>CI: merge to main → trigger
-    CI->>Prod: bench --site prod backup
-    CI->>Prod: bench --site prod migrate (idempotent)
-    CI->>Prod: bench --site prod restart
+    Dep->>Repo: committer creates branch and commits
+    Dep->>GH: pr_opener via gh CLI or REST fallback
+    GH->>GH: reviewer rotation tagged
+    GH->>GH: reviewer approves
+    GH->>CI: merge triggers CI
+    CI->>Prod: bench backup
+    CI->>Prod: bench migrate (idempotent)
+    CI->>Prod: bench restart
     alt migrate fails
         CI->>Prod: restore backup
-        CI->>GH: revert merge + page on-call
+        CI->>GH: revert merge and page on-call
     else migrate succeeds
         Dep->>Prod: smoke-test changed surface
-        Dep-->>PM: ✓ done · /frappe-stack:ship v0.X.0
+        Dep-->>PM: done, ready to ship
     end
 ```
 
 ## DocType layout (`stack_core`)
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#8B1E24',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#6A2E2E',
-    'lineColor': '#9E2A2F',
-    'secondaryColor': '#F5E6DD',
-    'fontFamily': 'Inter, system-ui, sans-serif'
-  }
-}}%%
 erDiagram
     STACK_BLUEPRINT ||--o{ STACK_AUDIT_LOG : "logs mutations of"
     STACK_BLUEPRINT ||--o| STACK_WORKFLOW_DEF : "may extend as"
-    STACK_WORKFLOW_DEF ||--o{ EXPERIMENT_ASSIGNMENT : "tracks A/B in"
+    STACK_WORKFLOW_DEF ||--o{ EXPERIMENT_ASSIGNMENT : "tracks A-B in"
 
     STACK_BLUEPRINT {
         string blueprint_name PK
-        string blueprint_type "DocType / Workflow / Dashboard / Report / …"
-        int    version "++ on every save"
-        string status "Draft / Validating / Applied / Failed / Reverted"
-        json   payload "schema-validated per blueprint_type"
+        string blueprint_type "DocType, Workflow, Dashboard, Report, etc"
+        int    version "increments on every save"
+        string status "Draft, Validating, Applied, Failed, Reverted"
+        json   payload "schema-validated per blueprint type"
         string git_commit_sha "set on /push"
         datetime applied_at
         link applied_by "User"
@@ -194,25 +137,25 @@ erDiagram
         link   target_doctype
         json   states_json "validated by workflow_validator"
         json   transitions_json
-        string experiment_id "empty = no experiment"
-        string experiment_status "Running / Paused / Promoted / Abandoned"
+        string experiment_id "empty means no experiment"
+        string experiment_status "Running, Paused, Promoted, Abandoned"
     }
     EXPERIMENT_ASSIGNMENT {
         link   doc_reference "Dynamic Link to experimented doc"
         link   workflow
         string experiment_id "indexed"
-        string arm "arm_a / arm_b"
+        string arm "arm_a or arm_b"
         datetime assigned_at
-        string outcome "pending / approved / rejected / cancelled / expired"
+        string outcome "pending, approved, rejected, cancelled, expired"
         datetime outcome_at
         int cycle_time_seconds
     }
     STACK_AUDIT_LOG {
         link   actor "User, indexed"
-        string action "api.build_doctype / blueprint.update / …"
+        string action "api.build_doctype, blueprint.update, etc"
         link   blueprint "optional"
         datetime timestamp "indexed"
-        string result "success / failure / denied"
+        string result "success, failure, denied"
         string ip_address
         text   before_json
         text   after_json
