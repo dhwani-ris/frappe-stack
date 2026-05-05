@@ -71,6 +71,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - **Coaches** (injects hidden context) on: vague build intents (suggests the matching slash command), production-write intents, permission bypass, elevated fieldtype mentions, schema-rename intents, A/B intents without a question, multi-blueprint features without a spec, integration setups.
 - `skills/process/prompt-coaching/SKILL.md` — reference for what the hook does and how to tune false positives.
 
+### Added (Documentation hub — 2026-05-05)
+
+- `docs/README.md` — top-level documentation index with how-the-pieces-fit diagram.
+- `docs/skills.md` — full catalog of all 17 skills with trigger phrases, purpose, and refusals.
+- `docs/agents.md` — all 8 agents with model choice, tools, pairings, refusals.
+- `docs/commands.md` — all 9 slash commands with arguments, refusals, typical-flow diagram.
+- `docs/hooks.md` — all 8 hooks across 4 lifecycle events with the layered-enforcement matrix.
+- `docs/architecture.md` — three-actor diagram, B+ hybrid sync model, end-to-end build flow, end-to-end promote flow, DocType layout, layered enforcement, failure modes.
+- `README.md` — refreshed top-level: install instructions, quick-links table, "what's in the box" inventory.
+
 ### Deferred to post-v0.1 (D-09)
 
 - `infra/`: Docker compose, CI workflows, pre-commit hooks. Will port from `dhwani-ris/frappe_dhwani_base` when reopened.
