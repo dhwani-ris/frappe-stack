@@ -1,60 +1,46 @@
 ---
-description: Pull current site state into the local config-repo working tree as JSON fixtures. Does not auto-commit — leaves the diff for human review.
+description: Pull current site state into the local config-repo working tree as JSON files. Reads via Frappe's stock REST API. Does not auto-commit — leaves the diff for human review.
 argument-hint: [--site=staging|prod] [--commit] [--push]
 ---
 
 # /frappe-stack:pull
 
-Site → git, no commit by default.
+Site → git, no commit by default. Reads via stock Frappe REST.
 
 ## What it does
 
-1. Calls `stack_core.api.fixtures.export` on the site.
-2. Runs `stack_core.git_bridge.exporter` against the configured `config_repo.local_path`.
-3. Per-blueprint JSON files written under `fixtures/app/doctypes/`, `fixtures/app/workflows/`, etc.
-4. Reports: which files changed, `git diff --stat` output.
-5. **Stops there.** User inspects the diff and either commits manually or runs `/frappe-stack:promote`.
+1. Fetches the relevant resources from the configured site:
+   - `GET /api/resource/DocType?filters=[["custom","=",1]]&fields=["*"]&limit_page_length=0`
+   - `GET /api/resource/Workflow?fields=["*"]&limit_page_length=0`
+   - `GET /api/resource/Custom Field?fields=["*"]&limit_page_length=0`
+   - `GET /api/resource/Property Setter?fields=["*"]&limit_page_length=0`
+2. Writes per-resource JSON files into the configured `config_repo.local_path`:
+   - `fixtures/app/doctypes/<name>.json`
+   - `fixtures/app/workflows/<name>.json`
+   - `fixtures/app/custom_fields.json`
+   - `fixtures/app/property_setters.json`
+3. Reports: which files changed, plus a `git diff --stat` summary.
+4. **Stops there.** User inspects the diff and either commits manually or runs `/frappe-stack:promote`.
 
 ## Flags
 
-- `--site=staging` — default. Pulls from the staging site.
-- `--site=prod` — pulls from production. Read-only, safe.
+- `--site=staging` — default.
+- `--site=prod` — read-only, safe.
 - `--commit` — commits the working tree changes locally with an auto-generated message. Does not push.
 - `--push` — implies `--commit`, also pushes to a feature branch (not main).
 
 ## Refuses if
 
-- Working tree has uncommitted changes that conflict with what would be written. (Surfaces the conflict, asks the user to stash/commit first.)
-- `config_repo.local_path` not configured.
-- Network error on the API call (after 3 retries with backoff).
-
-## Output
-
-```text
-Pulled 3 blueprints from staging (https://staging.example.com).
-Files written:
-  fixtures/app/doctypes/beneficiary.json (modified)
-  fixtures/app/workflows/beneficiary_approval.json (new)
-  fixtures/app/custom_fields.json (modified)
-
-Run `git diff` to review. Then either:
-  - /frappe-stack:promote   to open a PR
-  - git commit              to commit locally
-  - git stash               to discard
-```
+- Working tree has uncommitted changes that conflict with what would be written.
+- `config_repo.local_path` not configured (run `/frappe-stack:init` first).
+- Network error on the API call (after 3 retries with exponential backoff).
+- 401/403 from Frappe — the API user lacks read permission for one of the resource types.
 
 ## Examples
 
 ```text
-# Default — pull staging, leave for review
 /frappe-stack:pull
-
-# Pull and auto-commit
 /frappe-stack:pull --commit
-
-# Pull, commit, push to a feature branch
 /frappe-stack:pull --commit --push
-
-# Pull from prod (read-only — useful for "what's actually on prod right now?")
 /frappe-stack:pull --site=prod
 ```

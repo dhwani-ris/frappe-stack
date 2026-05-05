@@ -1,5 +1,5 @@
 ---
-description: Show the structured drift between site state and the configured config-repo HEAD. Three buckets — only on site, only in git, changed.
+description: Show structured drift between site state (read via Frappe's stock REST) and the configured config-repo HEAD. Three buckets — only on site, only in git, changed.
 argument-hint: [--site=staging|prod]
 ---
 
@@ -9,11 +9,11 @@ The drift detector. Run before any promote, or any time the site might have dive
 
 ## What it does
 
-1. Calls `stack_core.api.diff.diff` on the configured site.
-2. The diff API itself calls `stack_core.api.fixtures.export` (current site state) and `git_bridge/differ.py` (compared against `config_repo.local_path` HEAD).
-3. Returns three lists:
-   - **only_on_site** — blueprints created on the site that aren't in git.
-   - **only_in_git** — blueprints in git that haven't been applied.
+1. Fetches current site state via stock Frappe REST (same calls as `/frappe-stack:pull`, but without writing files).
+2. Reads the configured `config_repo.local_path` HEAD.
+3. Compares the two. Returns three lists:
+   - **only_on_site** — resources created on the site that aren't in git.
+   - **only_in_git** — resources in git that haven't been applied.
    - **changed** — same name, different payload.
 
 ## Flags
@@ -27,41 +27,28 @@ The drift detector. Run before any promote, or any time the site might have dive
 Diff: site=https://staging.example.com  vs  config-repo=main@<sha>
 
   only_on_site:    1
-    - "Quick Test DocType"          (Stack Author created it on the UI)
+    - DocType "Quick Test"           (someone built it directly on the desk)
   only_in_git:     0
   changed:         1
-    - "Beneficiary"                  (3 fields differ)
-        site:  age=Int(non_negative)
-        git:   age=Int (no constraint)
+    - DocType "Beneficiary"          (3 fields differ)
+        site:  age = Int (no constraint)
+        git:   age = Int (non_negative=1)
 
 Summary: 2 differences. Resolve before /frappe-stack:promote.
 ```
 
-## Resolving conflicts (`changed` bucket)
+## Resolving conflicts
 
-Pick a direction per blueprint:
-
-```text
-# If site is canonical:
-/frappe-stack:pull          # overwrites git with site state
-
-# If git is canonical:
-/frappe-stack:push          # overwrites site with git state (staging only)
-```
-
-Never both. The differ refuses to auto-resolve.
+Pick a direction per resource. If the site is canonical: `/frappe-stack:pull`. If git is canonical: `/frappe-stack:push` (staging only). The diff refuses to auto-resolve.
 
 ## Refuses if
 
 - `config_repo.local_path` not configured.
-- Git working tree has uncommitted changes (would confuse the comparison).
+- Git working tree has uncommitted changes.
 
 ## Examples
 
 ```text
-# Standard drift check
 /frappe-stack:diff
-
-# Verify prod matches the latest merge
 /frappe-stack:diff --site=prod
 ```

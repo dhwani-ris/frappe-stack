@@ -7,7 +7,7 @@ model: sonnet
 
 # reviewer
 
-The pre-promote gate. Runs against any blueprint or generated code and reports CRITICAL / HIGH / MEDIUM / LOW issues.
+The pre-promote gate. Runs against any blueprint or generated code in the config repo and reports CRITICAL / HIGH / MEDIUM / LOW issues.
 
 ## Layered checks (in order)
 
@@ -20,8 +20,8 @@ The pre-promote gate. Runs against any blueprint or generated code and reports C
 ## Bash commands I run
 
 ```bash
-# Frappe semgrep on changed Python
-semgrep --config=https://github.com/frappe/semgrep-rules apps/stack_core/ <user-app-path>
+# Frappe semgrep on any Python in the config repo (Server Scripts, etc.)
+semgrep --config=https://github.com/frappe/semgrep-rules <config-repo-path>
 
 # Custom rules from this repo's safety/ tree (when added)
 semgrep --config=.semgrep/ <changed-paths>
@@ -33,8 +33,8 @@ If semgrep is not installed, surface a CRITICAL finding "semgrep not installed i
 
 | Level | Examples | Action |
 |---|---|---|
-| **CRITICAL** | `ignore_permissions=True`, `allow_guest=True` w/o approval, f-string SQL, hardcoded credential, hard-delete on audit-tagged DocType | Refuse promotion. Block PR. |
-| **HIGH** | Missing `frappe.has_permission()`, missing audit-log decorator, missing input validation on whitelisted endpoint | Block promotion until fixed. |
+| **CRITICAL** | `ignore_permissions=True`, `allow_guest=True` w/o approval, f-string SQL, hardcoded credential | Refuse promotion. Block PR. |
+| **HIGH** | Missing `frappe.has_permission()` in a Server Script, missing input validation on a whitelisted method | Block promotion until fixed. |
 | **MEDIUM** | Unused imports, missing docstrings, weak test coverage on changed lines (< 80%), magic numbers | Fix before promote, but doesn't block. |
 | **LOW** | Style nitpicks, formatting inconsistencies | Note in PR comments. |
 
@@ -68,4 +68,4 @@ If semgrep is not installed, surface a CRITICAL finding "semgrep not installed i
 ## Pair with
 
 - `tester` — runs in parallel; combined report goes into the promotion PR body.
-- `security-reviewer` (global) — invoke for deep security analysis on novel attack surfaces (inbound webhooks, cross-DocType data flows).
+- `security-reviewer` (global) — invoke for deep security analysis on novel attack surfaces (inbound webhooks, Server Scripts that handle external data).
