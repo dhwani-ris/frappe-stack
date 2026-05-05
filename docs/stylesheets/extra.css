@@ -1,32 +1,45 @@
 /* frappe-stack docs — custom theme tweaks
+   Brand colors lifted from dhwaniris.com:
+     primary   #811622   deep maroon  (logo + headers)
+     accent    #F58634   saffron orange (CTAs / status pill)
+     secondary #53435B   muted purple (sparing use)
+     warm bg   #f7e2d1   cream (light-mode subtle accents)
    Goals: clean / minimal / Inter type / generous whitespace,
-   matching the ai-playground-sessions reference aesthetic.
-   Brand color is teal — easy to swap once dhwaniris.com brand
-   color is confirmed (search this file for #00695c). */
+   matching the ai-playground-sessions reference aesthetic. */
 
 :root {
-  --md-primary-fg-color: #00695c;
-  --md-primary-fg-color--light: #439889;
-  --md-primary-fg-color--dark: #003d33;
-  --md-accent-fg-color: #ff6e40;
+  --md-primary-fg-color: #811622;
+  --md-primary-fg-color--light: #a83849;
+  --md-primary-fg-color--dark: #5c0e18;
+  --md-accent-fg-color: #F58634;
+  --md-accent-fg-color--transparent: rgba(245, 134, 52, 0.1);
+
+  --dhwani-secondary: #53435B;
+  --dhwani-cream: #f7e2d1;
 }
 
 [data-md-color-scheme="default"] {
-  --md-default-bg-color: #fafafa;
+  --md-default-bg-color: #ffffff;
   --md-default-fg-color: #1a1a1a;
   --md-default-fg-color--light: #5b5b5b;
   --md-typeset-color: #1a1a1a;
+  --md-typeset-a-color: #811622;
 }
 
 [data-md-color-scheme="slate"] {
-  --md-default-bg-color: #0e1419;
-  --md-default-bg-color--light: #161d24;
-  --md-default-fg-color: #e6e6e6;
-  --md-default-fg-color--light: #a0a0a0;
-  --md-typeset-color: #e6e6e6;
+  --md-default-bg-color: #15090b;
+  --md-default-bg-color--light: #1f1014;
+  --md-default-fg-color: #f0e6e8;
+  --md-default-fg-color--light: #b8a8ac;
+  --md-typeset-color: #f0e6e8;
+  --md-primary-fg-color: #c44056;
+  --md-primary-fg-color--light: #d96978;
+  --md-primary-fg-color--dark: #811622;
+  --md-accent-fg-color: #ffa066;
+  --md-typeset-a-color: #d96978;
 }
 
-/* Tighten typography — Inter looks better at slightly smaller line-height */
+/* Typography — tighter Inter */
 .md-typeset {
   font-size: 0.78rem;
   line-height: 1.6;
@@ -46,43 +59,60 @@
   margin-bottom: 0.6em;
 }
 
-/* Header — subtle border instead of heavy shadow */
+/* Header banner — brand maroon, white text */
 .md-header {
-  box-shadow: none;
-  border-bottom: 1px solid var(--md-default-fg-color--lightest);
-  background: var(--md-default-bg-color);
-  color: var(--md-default-fg-color);
+  background: var(--md-primary-fg-color);
+  color: #ffffff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
 }
 
 [data-md-color-scheme="slate"] .md-header {
-  background: var(--md-default-bg-color);
+  background: var(--md-primary-fg-color--dark);
+  color: var(--md-default-fg-color);
 }
 
 .md-header__title {
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
   letter-spacing: -0.01em;
 }
 
-/* Tabs — quieter, no underline weirdness */
-.md-tabs {
-  background: var(--md-default-bg-color);
+[data-md-color-scheme="slate"] .md-header__title {
   color: var(--md-default-fg-color);
-  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-header__button {
+  color: #ffffff;
+}
+
+[data-md-color-scheme="slate"] .md-header__button {
+  color: var(--md-default-fg-color);
+}
+
+/* Tabs sit under the header in the same maroon */
+.md-tabs {
+  background: var(--md-primary-fg-color);
+  color: #ffffff;
+}
+
+[data-md-color-scheme="slate"] .md-tabs {
+  background: var(--md-primary-fg-color--dark);
 }
 
 .md-tabs__link {
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.72rem;
-  opacity: 0.75;
-  transition: opacity 120ms ease;
+  opacity: 1;
+  transition: color 120ms ease;
 }
 
 .md-tabs__link:hover,
 .md-tabs__link--active {
-  opacity: 1;
+  color: #ffffff;
 }
 
-/* Sidebar — softer */
+/* Sidebar */
 .md-nav__title {
   font-size: 0.72rem;
   font-weight: 600;
@@ -95,7 +125,17 @@
   font-size: 0.74rem;
 }
 
-/* Code blocks — softer corners, more breathing room */
+.md-nav__link--active,
+.md-nav__link[aria-current=page] {
+  color: var(--md-primary-fg-color);
+}
+
+[data-md-color-scheme="slate"] .md-nav__link--active,
+[data-md-color-scheme="slate"] .md-nav__link[aria-current=page] {
+  color: var(--md-primary-fg-color--light);
+}
+
+/* Code blocks */
 .md-typeset code,
 .md-typeset pre > code {
   border-radius: 6px;
@@ -107,10 +147,15 @@
 }
 
 [data-md-color-scheme="default"] .md-typeset pre > code {
-  background: #f4f4f4;
+  background: #faf5ef;
 }
 
-/* Tables — cleaner, no heavy borders */
+[data-md-color-scheme="default"] .md-typeset code:not(pre code) {
+  background: var(--dhwani-cream);
+  color: var(--md-primary-fg-color);
+}
+
+/* Tables */
 .md-typeset table:not([class]) {
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 8px;
@@ -134,21 +179,34 @@
 
 .md-typeset table:not([class]) thead th {
   border-top: none;
+  background: var(--dhwani-cream);
+  color: var(--md-primary-fg-color);
 }
 
-/* Grid cards (used on the landing page) */
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) thead th {
+  background: var(--md-default-bg-color--light);
+  color: var(--md-primary-fg-color--light);
+}
+
+/* Grid cards */
 .md-typeset .grid.cards > ul > li,
 .md-typeset .grid > .card {
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 10px;
   padding: 1.1rem 1.2rem;
-  transition: border-color 150ms ease, transform 150ms ease;
+  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
 .md-typeset .grid.cards > ul > li:hover,
 .md-typeset .grid > .card:hover {
   border-color: var(--md-primary-fg-color);
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(129, 22, 34, 0.08);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li:hover,
+[data-md-color-scheme="slate"] .md-typeset .grid > .card:hover {
+  box-shadow: 0 4px 14px rgba(196, 64, 86, 0.18);
 }
 
 .md-typeset .grid.cards .lg.middle {
@@ -157,7 +215,11 @@
   color: var(--md-primary-fg-color);
 }
 
-/* Admonitions — flatter */
+[data-md-color-scheme="slate"] .md-typeset .grid.cards .lg.middle {
+  color: var(--md-primary-fg-color--light);
+}
+
+/* Admonitions */
 .md-typeset .admonition,
 .md-typeset details {
   border-radius: 8px;
@@ -174,36 +236,58 @@
 }
 
 .md-footer-meta {
-  background: var(--md-default-bg-color);
+  background: var(--md-primary-fg-color--dark);
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* Search — refine */
-.md-search__form {
-  background: var(--md-default-bg-color);
-  border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 6px;
+.md-footer-meta a {
+  color: var(--md-accent-fg-color);
 }
 
-[data-md-color-scheme="slate"] .md-search__form {
-  background: var(--md-default-bg-color--light);
-}
-
-/* Hide the very subtle "made with material" if it shows */
 .md-footer__inner {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
 
-/* Hero adjustments on the home page */
+/* Search */
+.md-search__form {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #ffffff;
+}
+
+.md-search__form:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.md-search__input {
+  color: #ffffff;
+}
+
+.md-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-md-color-scheme="slate"] .md-search__form {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Hero on landing */
 .md-typeset .hero {
-  padding: 1rem 0 2rem;
+  padding: 1.5rem 0 2.5rem;
   border-bottom: 1px solid var(--md-default-fg-color--lightest);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .md-typeset .hero h1 {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   margin-bottom: 0.4em;
+  color: var(--md-primary-fg-color);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .hero h1 {
+  color: var(--md-primary-fg-color--light);
 }
 
 .md-typeset .hero .tagline {
@@ -212,21 +296,68 @@
   max-width: 64ch;
 }
 
-/* Status pill (used on landing) */
+/* Status pill — saffron + cream */
 .md-typeset .status-pill {
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0.25rem 0.6rem;
+  padding: 0.3rem 0.7rem;
   border-radius: 999px;
-  background: rgba(0, 105, 92, 0.1);
+  background: var(--dhwani-cream);
   color: var(--md-primary-fg-color);
+  border: 1px solid rgba(129, 22, 34, 0.15);
   margin-bottom: 1rem;
 }
 
 [data-md-color-scheme="slate"] .md-typeset .status-pill {
-  background: rgba(67, 152, 137, 0.15);
-  color: var(--md-primary-fg-color--light);
+  background: rgba(245, 134, 52, 0.12);
+  color: var(--md-accent-fg-color);
+  border-color: rgba(245, 134, 52, 0.25);
+}
+
+/* Buttons */
+.md-typeset .md-button {
+  border-color: var(--md-primary-fg-color);
+  color: var(--md-primary-fg-color);
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.md-typeset .md-button:hover,
+.md-typeset .md-button:focus {
+  background: var(--md-primary-fg-color);
+  color: #ffffff;
+  border-color: var(--md-primary-fg-color);
+}
+
+.md-typeset .md-button--primary {
+  background: var(--md-primary-fg-color);
+  color: #ffffff;
+  border-color: var(--md-primary-fg-color);
+}
+
+.md-typeset .md-button--primary:hover,
+.md-typeset .md-button--primary:focus {
+  background: var(--md-primary-fg-color--dark);
+  border-color: var(--md-primary-fg-color--dark);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .md-button--primary {
+  background: var(--md-primary-fg-color);
+  border-color: var(--md-primary-fg-color);
+}
+
+/* Selection — saffron */
+::selection {
+  background: rgba(245, 134, 52, 0.35);
+  color: inherit;
+}
+
+/* Code-block keyword color tinted with brand */
+[data-md-color-scheme="default"] .highlight .k,
+[data-md-color-scheme="default"] .highlight .kn,
+[data-md-color-scheme="default"] .highlight .kr {
+  color: var(--md-primary-fg-color);
 }
