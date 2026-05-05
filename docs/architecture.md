@@ -1,8 +1,8 @@
 # Architecture
 
-How the plugin, the support app, and your GitHub repository fit together.
+How the plugin, your Frappe site, and your GitHub repository fit together.
 
-## Three actors
+## Two actors and a sync layer
 
 <div class="grid cards" markdown>
 
@@ -10,38 +10,40 @@ How the plugin, the support app, and your GitHub repository fit together.
 
     ---
 
-    The plugin lives here. Slash commands launch the engineer agent, which loads the right skill for your ask. Hooks run before each tool call to keep things safe.
+    The plugin lives here — skills, agents, slash commands, and safety hooks. The engineer agent loads the right skill for your ask. Hooks run before each tool call to keep things safe.
 
     - Slash commands: `/frappe-stack:*`
     - Skills loaded by `engineer`
     - Hooks: prompt · pre-tool · post-tool · stop
     - Local audit log: `.frappe-stack/audit.jsonl`
+    - Git operations run from your local config-repo checkout
 
--   :material-database-outline:{ .lg .middle } **2 · Frappe site + `stack_core`**
+-   :material-database-outline:{ .lg .middle } **2 · Stock Frappe v15+ site**
 
     ---
 
-    Your staging site runs the small support app. Every API call is permission-checked, validated against guardrails, and audit-logged. The git-bridge module exports state on demand.
+    The plugin authenticates with an API key + secret and uses Frappe's built-in REST endpoints. Nothing custom is installed on the site.
 
-    - DocTypes: Stack Blueprint, Workflow Def, Experiment Assignment, Audit Log
-    - API: `stack_core.api.*`
-    - Guardrails: schema · fieldtype · reserved-name · workflow · permission
-    - git_bridge: exporter · committer · pr_opener · differ · applier
+    - `POST /api/resource/DocType` — create / update DocTypes
+    - `POST /api/resource/Workflow` — create workflows
+    - `POST /api/resource/Custom Field` — add fields
+    - `POST /api/resource/Property Setter` — change properties
+    - Frappe's built-in Activity Log records every mutation server-side
 
 -   :material-source-repository:{ .lg .middle } **3 · GitHub config repository**
 
     ---
 
-    Your single source of truth for production. Each blueprint is a JSON file. Production only accepts changes via pull requests — `bench migrate` runs on merge.
+    Your single source of truth for production. Each blueprint is a JSON file in `fixtures/`. Production only accepts changes via pull requests — your CI runs `bench migrate` on merge.
 
     - `fixtures/app/doctypes/*.json`
     - `fixtures/app/workflows/*.json`
     - `fixtures/site/<sitename>/overrides.json`
-    - `main` protected → CI runs `bench migrate` on prod
+    - `main` branch protected
 
 </div>
 
-The arrows: **Claude Code → Frappe site** (HTTPS + API key, staging only). **Frappe site ↔ GitHub** (pull / push fixtures via the git-bridge). **GitHub → production** (PR merge triggers `bench migrate`).
+The arrows: **Claude Code → Frappe site** (HTTPS + token auth, staging only). **Claude Code → GitHub** (your local checkout, plus `gh` CLI / REST API for PR creation). **GitHub → production site** (your existing CI/CD runs `bench migrate` on PR merge — same pattern as any Frappe deployment).
 
 ## The B+ hybrid sync model
 
@@ -51,7 +53,7 @@ The arrows: **Claude Code → Frappe site** (HTTPS + API key, staging only). **F
 | **Staging** | git → site via `/push` | ✓ |
 | **Production** | Site → git (read-only export) | ✓ |
 | **Production** | git → site via `bench migrate` (on PR merge) | ✓ |
-| **Production** | direct API write | ✗ blocked by `is_production=1` |
+| **Production** | direct API write from the plugin | ✗ blocked by hook (host marked `is_production` in `.frappe-stack/config.json`) |
 
 `/promote` is the bridge: snapshot staging → PR against config-repo `main` → review → merge → CI migrates prod.
 
@@ -82,21 +84,18 @@ sequenceDiagram
     actor PM
     participant Hook as prompt hook
     participant Eng as engineer
-    participant API as stack_core API
-    participant DB as Frappe DB
+    participant Frappe as Frappe REST
     participant Auto as reviewer + tester
 
     PM->>Hook: make a beneficiary form
     Hook->>Eng: route to /frappe-stack:build doctype
     Eng->>Eng: load designing-forms skill
-    Eng->>PM: print JSON, ask for confirmation
+    Eng->>Eng: validate JSON schema, reserved-name, fieldtype whitelist
+    Eng->>PM: print payload, ask for confirmation
     PM->>Eng: confirms
-    Eng->>API: POST stack_core.api.doctype_builder.build
-    API->>API: permission check + validators
-    API->>DB: upsert Stack Blueprint
-    API->>DB: materialize DocType
-    API->>DB: audit log row
-    API-->>Eng: status equals Applied
+    Eng->>Frappe: POST /api/resource/DocType
+    Frappe-->>Eng: 201 Created
+    Eng->>Eng: append local audit log entry
     Eng->>Auto: run reviewer and tester in parallel
     Auto-->>PM: ready to /pull or /promote
 ```
@@ -127,22 +126,22 @@ sequenceDiagram
     autonumber
     actor PM
     participant Dep as deployer
-    participant Repo as config repo
+    participant Repo as config repo (local)
     participant GH as GitHub PR
-    participant CI as prod CI
+    participant CI as your CI / CD
     participant Prod as production site
 
     PM->>Dep: /frappe-stack:promote
     Dep->>Dep: run pre-promote checklist
-    Note right of Dep: diff clean, all Applied,<br>reviewer green, tester at 80% or more,<br>backup recent, roles covered
-    Dep->>Repo: exporter writes per-blueprint JSONs
-    Dep->>Repo: committer creates branch and commits
-    Dep->>GH: pr_opener via gh CLI or REST fallback
+    Note right of Dep: diff clean, reviewer green,<br>tester at 80% or more,<br>backup recent, roles covered
+    Dep->>Repo: write per-blueprint JSONs
+    Dep->>Repo: git commit and push branch
+    Dep->>GH: gh pr create (REST fallback)
     GH->>GH: reviewer rotation tagged
     GH->>GH: reviewer approves
-    GH->>CI: merge triggers CI
+    GH->>CI: merge triggers your pipeline
     CI->>Prod: bench backup
-    CI->>Prod: bench migrate (idempotent)
+    CI->>Prod: bench migrate
     CI->>Prod: bench restart
     alt migrate fails
         CI->>Prod: restore backup
@@ -153,52 +152,41 @@ sequenceDiagram
     end
 ```
 
-## DocType layout (`stack_core`)
+## Where things live
 
-The four DocTypes the support app installs:
-
-| DocType | Holds | Notable |
-|---|---|---|
-| **Stack Blueprint** | Versioned JSON config — DocType, Workflow, Dashboard, Report, Custom Field, Property Setter | `status` flips Draft → Validating → Applied. `git_commit_sha` set on `/push`. |
-| **Stack Workflow Def** | Workflow definition + experiment metadata | Validates states, transitions, traffic split sums to 100. Optional `experiment_id` enables A/B. |
-| **Experiment Assignment** | One row per A/B-tracked document | Append-only. Hard-delete blocked. Records `arm`, `outcome`, `cycle_time_seconds`. |
-| **Stack Audit Log** | Every API mutation + actor + timestamp + before/after JSON | Append-only. Hard-delete blocked. `permission_query` restricts non-admins to their own rows. |
+| Concept | Where it actually lives |
+|---|---|
+| Blueprint (the JSON for a DocType / Workflow / etc.) | A JSON file in your GitHub config repo, plus the live record on your Frappe site |
+| Plugin actions audit | `.frappe-stack/audit.jsonl` on your machine — every Bash / Edit / Write the plugin issued |
+| Frappe-side audit | Frappe's built-in Activity Log on the site — every doc creation / edit, captured automatically |
+| A/B experiment assignment | A small DocType the plugin creates on your site when you run your first `/frappe-stack:experiment define`. Just a normal DocType — nothing custom-installed. |
+| Versioning | `git log` on your config repo. No separate "blueprint version" field. |
+| Production state | The result of the most recent `bench migrate` on prod — driven by your CI from the config-repo `main` branch. |
 
 ## Layered enforcement
 
-The same rule appears at multiple layers — defense in depth.
+The same rule appears at multiple layers — defense in depth. All enforcement happens in the plugin (your machine) since there's nothing custom-installed on Frappe.
 
-| Concern | Plugin layer | API layer | DB layer | CI layer |
-|---|---|---|---|---|
-| Reserved DocType name | UserPromptSubmit nudge | `guardrails/reserved_names.py` | n/a | n/a |
-| Fieldtype whitelist | n/a | `guardrails/fieldtype_whitelist.py` (role-gated) | n/a | n/a |
-| `ignore_permissions=True` | UserPromptSubmit nudge | PreToolUse `block_ignore_permissions.py` | refused if blueprint requests it | semgrep |
-| Direct prod API write | UserPromptSubmit nudge | PreToolUse `block_direct_prod_api.py` | `permission_enforcer.refuse_on_production` | n/a |
-| Hard delete on audit-tagged | n/a | n/a | `before_delete` + DocType `on_trash` | n/a |
-| f-string SQL | n/a | PreToolUse `block_fstring_sql.py` | n/a | semgrep + frappe-semgrep-rules |
-| Force-push to protected | UserPromptSubmit nudge | PreToolUse `block_dangerous_bash.py` | n/a | GitHub branch protection |
-| Real PII in prompt | UserPromptSubmit block | n/a | n/a | n/a |
-
-## Local audit + remote audit
-
-Two audit trails, deliberately:
-
-- **`.frappe-stack/audit.jsonl`** (local) — every tool call (Bash / Edit / Write) by the PM in their session. Independent of network. Useful when the site is unreachable.
-- **`Stack Audit Log` DocType** (remote, on the site) — every API call and blueprint mutation, with actor, IP, before / after. Append-only, queryable from the desk.
-
-Both are durable. Disagreement between them is itself diagnostic — the `analyst` agent can surface the gap on demand.
+| Concern | Plugin layer | CI layer |
+|---|---|---|
+| Reserved DocType name | UserPromptSubmit nudge + skill refusal | n/a |
+| Fieldtype whitelist | Skill refusal (Code/Password/Attach gated to elevated role) | n/a |
+| `ignore_permissions=True` | UserPromptSubmit nudge + PreToolUse `block_ignore_permissions.py` | semgrep on the config repo |
+| Direct prod API write | UserPromptSubmit nudge + PreToolUse `block_direct_prod_api.py` | n/a |
+| f-string SQL | PreToolUse `block_fstring_sql.py` | semgrep + frappe-semgrep-rules |
+| Force-push to protected | UserPromptSubmit nudge + PreToolUse `block_dangerous_bash.py` | GitHub branch protection |
+| Real PII in prompt | UserPromptSubmit block | n/a |
 
 ## Failure modes the system handles
 
 | Failure | What happens |
 |---|---|
-| `gh` CLI not installed | `pr_opener.py` falls back to GitHub REST API |
-| GitHub token absent | `pr_opener.py` raises a clear error; operator configures it |
-| Working tree dirty before promote | `committer.py` refuses; surfaces existing changes |
+| `gh` CLI not installed | The deployer falls back to GitHub REST API |
+| GitHub token absent | Deployer raises a clear error; user provides token via `/frappe-stack:init` |
+| Working tree dirty before promote | The deployer refuses; surfaces existing changes |
 | Network down during commit | Commits locally; push retries |
-| Schema migration fails on prod | CI auto-restores backup, reverts merge, pages on-call |
+| Schema migration fails on prod | Your CI auto-restores backup, reverts merge, pages on-call |
 | Token leaked | Operator runs the rotate-keys runbook; old token invalidated |
-| Blueprint validation fails on apply | `Stack Blueprint.status = Failed` with `validation_errors` set |
-| Drift detected daily | `applier.reconcile_drift` logs an Error Log entry |
+| API call rejected by Frappe permissions | Plugin surfaces the 403 to the user with the missing-role detail |
 
 See [`SECURITY.md §5`](../SECURITY.md#5-incident-response) for the formal incident protocol.

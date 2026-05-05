@@ -10,7 +10,7 @@ hide:
 
 # Build Frappe apps without writing code
 
-<p class="tagline">frappe-stack is a Claude Code plugin for product managers and analysts. Describe what you need in plain language; the plugin generates the DocType, Workflow, Dashboard, or Report and applies it to your staging Frappe site. Every change is mirrored in GitHub automatically.</p>
+<p class="tagline">frappe-stack is a Claude Code plugin for product managers and analysts. Describe what you need in plain language; the plugin generates the DocType, Workflow, Dashboard, or Report and applies it to your staging Frappe site via the stock REST API. Every change is mirrored in GitHub automatically.</p>
 
 [Try the first tutorial →](walkthroughs/01-first-doctype.md){ .md-button .md-button--primary }
 [View on GitHub](https://github.com/dhwani-ris/frappe-stack){ .md-button }
@@ -56,14 +56,13 @@ Inside a Claude Code session:
 /plugin install frappe-stack@frappe-stack
 ```
 
-On any Frappe v15+ site you want to manage, install the support app once:
+Then point the plugin at your Frappe v15+ site (it will prompt for an API key generated via Frappe Desk → User → API Access):
 
-```bash
-bench get-app stack_core /path/to/frappe-stack/apps/stack_core
-bench --site <sitename> install-app stack_core
+```text
+/frappe-stack:init https://your-staging-site.example.com
 ```
 
-The full setup guide is in [Installing stack_core](operators/installing-stack-core.md).
+That's it. Nothing to install on the Frappe site beyond stock Frappe.
 
 ## Where to next
 
@@ -79,4 +78,4 @@ The full setup guide is in [Installing stack_core](operators/installing-stack-co
 
 ---
 
-<small>v0.1.0 ships the complete scaffold: 17 skills, 8 agents, 9 slash commands, 8 safeguards, and the `stack_core` Frappe app. Tests are written; runtime smoke-tests are next. Track progress in [HEARTBEAT](HEARTBEAT.md).</small>
+<small>v0.1.0 ships the complete plugin scaffold: 17 skills, 8 agents, 9 slash commands, and 8 safeguards. Runtime smoke-tests are next. Track progress in [HEARTBEAT](HEARTBEAT.md).</small>

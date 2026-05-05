@@ -1,38 +1,37 @@
 # frappe-stack
 
-A Claude Code plugin for building Frappe v15+ apps without writing code. You type a slash command, the plugin generates the DocType / Workflow / Dashboard / Report, validates it against a fixed list of refusals, and either applies it to a staging site or opens a pull request. Frappe site state and a GitHub config repository stay in sync both directions.
+A Claude Code plugin for building Frappe v15+ apps without writing code. You type a slash command, the plugin generates the DocType / Workflow / Dashboard / Report, validates it, and either applies it to your staging Frappe site (via Frappe's stock REST API) or opens a pull request against your config repository.
 
-> **Status: v0.1.0 — scaffold only.** All artefacts are written and committed. Nothing has been runtime-tested yet: no clean Claude Code session has installed the plugin, no Frappe bench has installed `stack_core`, no test suite has run. Calling this "ready" would be incorrect. See [`HEARTBEAT.md`](./HEARTBEAT.md) for what's pending.
+> **Status: v0.1.0 — scaffold complete.** The plugin's skills, agents, slash commands, and safety hooks are all in place. Runtime smoke-tests against a real Frappe site are pending. See [`HEARTBEAT.md`](./HEARTBEAT.md) for the live state.
 
 ## What it does
 
-1. **Translates plain-language asks into Frappe configurations.** "I need a beneficiary form" → the plugin walks fields, permissions, validation; calls `stack_core.api.doctype_builder.build`; the DocType appears in Frappe.
-2. **Mirrors site changes into git, both directions.** Every change is a `Stack Blueprint` row + a JSON file in the config repository. `/pull` is site → git. `/push` is git → staging. `/promote` is staging → PR → production.
-3. **Refuses unsafe inputs at multiple layers.** `ignore_permissions=True`, `allow_guest=True` without review, f-string SQL, hardcoded role checks, real PII in prompts, force-push to `main`, hard-delete on audit-tagged DocTypes.
+1. **Plain-language asks become Frappe configurations.** "I need a beneficiary form" → the plugin walks fields, permissions, validation; calls Frappe's stock REST API; the DocType appears on your site.
+2. **Site changes mirror to git, both directions.** Each blueprint becomes a JSON file in your config repository. `/pull` is site → git, `/push` is git → staging, `/promote` opens a pull request from staging to production.
+3. **Unsafe inputs refused at multiple layers.** Real PII in prompts, `ignore_permissions=True`, `allow_guest=True` without review, f-string SQL, hardcoded role checks, force-push to `main`. Each rejection happens at the layer closest to the user — typing-time hooks for prompts, edit-time hooks for code.
 
 ## What it is not
 
-- **Not a Frappe app.** It ships a small support app `stack_core` that lives alongside, but the plugin itself is markdown + JSON for Claude Code.
-- **Not a drag-and-drop builder.** Frappe's Form Builder already exists; this plugin wraps and constrains it.
-- **Not opinionated about everything — but opinionated where it matters.** One sync model (B+ hybrid). One naming convention (auto-derived from the manifest `name` field). One promotion path.
+- **Not a Frappe app.** It's a Claude Code plugin. There's nothing to install on the Frappe site beyond what Frappe v15+ already ships. The plugin authenticates with a token and uses stock REST endpoints (`/api/resource/DocType`, `/api/resource/Workflow`, etc.).
+- **Not a drag-and-drop builder.** Frappe's Form Builder already exists — this plugin generates valid configs and applies them.
+- **Not a managed service.** It runs inside your Claude Code session. Your data stays on your Frappe site and your GitHub repository.
 
 ## Install
 
-Inside a Claude Code session:
+Inside a Claude Code session, run two commands:
 
 ```text
 /plugin marketplace add https://github.com/dhwani-ris/frappe-stack.git
 /plugin install frappe-stack@frappe-stack
 ```
 
-On every Frappe v15+ site you want the plugin to manage:
+Then point the plugin at your Frappe site:
 
-```bash
-bench get-app stack_core /path/to/frappe-stack/apps/stack_core
-bench --site <sitename> install-app stack_core
+```text
+/frappe-stack:init https://your-staging-site.example.com
 ```
 
-Full instructions in [`docs/operators/installing-stack-core.md`](./docs/operators/installing-stack-core.md).
+The `init` command will prompt for an API key + secret (generate them via Frappe Desk → User → API Access) and a path to a local checkout of your config repository.
 
 ## Documentation
 
@@ -44,15 +43,15 @@ In the repo:
 |---|---|
 | The first walkthrough | [`docs/walkthroughs/01-first-doctype.md`](./docs/walkthroughs/01-first-doctype.md) |
 | The data flow | [`docs/architecture.md`](./docs/architecture.md) |
-| The full surface area (skills / agents / commands / hooks) | [`docs/skills.md`](./docs/skills.md), [`docs/agents.md`](./docs/agents.md), [`docs/commands.md`](./docs/commands.md), [`docs/hooks.md`](./docs/hooks.md) |
-| To install on a site | [`docs/operators/installing-stack-core.md`](./docs/operators/installing-stack-core.md) |
+| Skills / agents / commands / hooks reference | [`docs/skills.md`](./docs/skills.md), [`docs/agents.md`](./docs/agents.md), [`docs/commands.md`](./docs/commands.md), [`docs/hooks.md`](./docs/hooks.md) |
+| Token rotation runbook | [`docs/operators/rotating-keys.md`](./docs/operators/rotating-keys.md) |
 | The threat model | [`SECURITY.md`](./SECURITY.md) |
 | To contribute | [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
 | To pick up a session mid-flight | [`CLAUDE.md`](./CLAUDE.md) → [`HEARTBEAT.md`](./HEARTBEAT.md) → [`PLAN.md`](./PLAN.md) |
 
 ## Working-memory files
 
-Four files at the repo root capture state across sessions, plus PLAN.md:
+Six files at the repo root capture state across sessions:
 
 | File | What it owns |
 |---|---|
@@ -71,12 +70,8 @@ Four files at the repo root capture state across sessions, plus PLAN.md:
 | Agents | 8 | [`agents/`](./agents/) — see [`docs/agents.md`](./docs/agents.md) |
 | Slash commands | 9 | [`commands/`](./commands/) — see [`docs/commands.md`](./docs/commands.md) |
 | Safety hooks | 8 | [`hooks/`](./hooks/) + [`.claude-plugin/hook_scripts/`](./.claude-plugin/hook_scripts/) — see [`docs/hooks.md`](./docs/hooks.md) |
-| `stack_core` DocTypes | 4 | [`apps/stack_core/stack_core/doctype/`](./apps/stack_core/stack_core/doctype/) |
-| `stack_core` API endpoints | 6 | [`apps/stack_core/stack_core/api/`](./apps/stack_core/stack_core/api/) |
-| Guardrail validators | 5 | [`apps/stack_core/stack_core/guardrails/`](./apps/stack_core/stack_core/guardrails/) |
-| Git-bridge modules | 5 | [`apps/stack_core/stack_core/git_bridge/`](./apps/stack_core/stack_core/git_bridge/) |
 | Tutorials | 4 | [`docs/walkthroughs/`](./docs/walkthroughs/) |
-| Operator runbooks | 2 | [`docs/operators/`](./docs/operators/) |
+| Operator runbook | 1 | [`docs/operators/rotating-keys.md`](./docs/operators/rotating-keys.md) |
 
 ## License
 
