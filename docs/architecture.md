@@ -1,46 +1,49 @@
 # Architecture
 
-How the plugin, the support app, and the GitHub config repo flow together.
+How the plugin, the support app, and your GitHub repository fit together.
 
-## The three actors
+## Three actors
 
-```mermaid
-flowchart LR
-    subgraph PM["1 · Claude Code on PM machine"]
-        direction TB
-        P1["Slash commands<br>/frappe-stack:*"]
-        P2["Skills loaded by<br>engineer agent"]
-        P3["Hooks: prompt / pre-tool /<br>post-tool / stop"]
-        P4["Local audit log<br>.frappe-stack/audit.jsonl"]
-    end
+<div class="grid cards" markdown>
 
-    subgraph SITE["2 · Frappe site + stack_core"]
-        direction TB
-        S1["DocTypes: Stack Blueprint,<br>Workflow Def, Experiment<br>Assignment, Audit Log"]
-        S2["API endpoints<br>stack_core.api.*"]
-        S3["Guardrails: schema, fieldtype,<br>reserved names, workflow,<br>permission enforcer"]
-        S4["git_bridge: exporter, committer,<br>pr_opener, differ, applier"]
-    end
+-   :material-laptop:{ .lg .middle } **1 · Claude Code on your machine**
 
-    subgraph GIT["3 · GitHub config repo"]
-        direction TB
-        G1["fixtures/app/doctypes/*.json"]
-        G2["fixtures/app/workflows/*.json"]
-        G3["fixtures/site/[sitename]/<br>overrides.json"]
-        G4["main protected, CI runs<br>bench migrate on prod"]
-    end
+    ---
 
-    PM ==>|"HTTPS + API key"| SITE
-    SITE ==>|"pull / push fixtures"| GIT
-    GIT ==>|"PR merge → bench migrate"| SITE
+    The plugin lives here. Slash commands launch the engineer agent, which loads the right skill for your ask. Hooks run before each tool call to keep things safe.
 
-    classDef actorBox fill:#F5E6DD,stroke:#8B1E24,stroke-width:2px,color:#2E2E2E
-    classDef itemBox fill:#ffffff,stroke:#D9B3A0,stroke-width:1px,color:#2E2E2E
-    class PM,SITE,GIT actorBox
-    class P1,P2,P3,P4,S1,S2,S3,S4,G1,G2,G3,G4 itemBox
-```
+    - Slash commands: `/frappe-stack:*`
+    - Skills loaded by `engineer`
+    - Hooks: prompt · pre-tool · post-tool · stop
+    - Local audit log: `.frappe-stack/audit.jsonl`
 
-## The B+ hybrid sync model (D-01 confirmed)
+-   :material-database-outline:{ .lg .middle } **2 · Frappe site + `stack_core`**
+
+    ---
+
+    Your staging site runs the small support app. Every API call is permission-checked, validated against guardrails, and audit-logged. The git-bridge module exports state on demand.
+
+    - DocTypes: Stack Blueprint, Workflow Def, Experiment Assignment, Audit Log
+    - API: `stack_core.api.*`
+    - Guardrails: schema · fieldtype · reserved-name · workflow · permission
+    - git_bridge: exporter · committer · pr_opener · differ · applier
+
+-   :material-source-repository:{ .lg .middle } **3 · GitHub config repository**
+
+    ---
+
+    Your single source of truth for production. Each blueprint is a JSON file. Production only accepts changes via pull requests — `bench migrate` runs on merge.
+
+    - `fixtures/app/doctypes/*.json`
+    - `fixtures/app/workflows/*.json`
+    - `fixtures/site/<sitename>/overrides.json`
+    - `main` protected → CI runs `bench migrate` on prod
+
+</div>
+
+The arrows: **Claude Code → Frappe site** (HTTPS + API key, staging only). **Frappe site ↔ GitHub** (pull / push fixtures via the git-bridge). **GitHub → production** (PR merge triggers `bench migrate`).
+
+## The B+ hybrid sync model
 
 | Site role | Direction | Allowed |
 |---|---|---|
@@ -55,14 +58,33 @@ flowchart LR
 ## End-to-end build flow
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#8B1E24',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#6A2E2E',
+    'lineColor': '#9E2A2F',
+    'secondaryColor': '#F5E6DD',
+    'actorBkg': '#8B1E24',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#6A2E2E',
+    'noteBkgColor': '#F5E6DD',
+    'noteTextColor': '#2E2E2E',
+    'noteBorderColor': '#D9B3A0',
+    'sequenceNumberColor': '#ffffff',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '14px'
+  }
+}}%%
 sequenceDiagram
     autonumber
     actor PM
-    participant Hook as UserPromptSubmit hook
-    participant Eng as engineer agent
+    participant Hook as prompt hook
+    participant Eng as engineer
     participant API as stack_core API
     participant DB as Frappe DB
-    participant Auto as reviewer plus tester
+    participant Auto as reviewer + tester
 
     PM->>Hook: make a beneficiary form
     Hook->>Eng: route to /frappe-stack:build doctype
@@ -70,20 +92,37 @@ sequenceDiagram
     Eng->>PM: print JSON, ask for confirmation
     PM->>Eng: confirms
     Eng->>API: POST stack_core.api.doctype_builder.build
-    API->>API: permission check
-    API->>API: refuse_on_production
-    API->>API: schema and reserved-name validators
+    API->>API: permission check + validators
     API->>DB: upsert Stack Blueprint
     API->>DB: materialize DocType
-    API->>DB: audit log row written
+    API->>DB: audit log row
     API-->>Eng: status equals Applied
-    Eng->>Auto: spawn reviewer and tester in parallel
+    Eng->>Auto: run reviewer and tester in parallel
     Auto-->>PM: ready to /pull or /promote
 ```
 
 ## End-to-end promote flow
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#8B1E24',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#6A2E2E',
+    'lineColor': '#9E2A2F',
+    'secondaryColor': '#F5E6DD',
+    'actorBkg': '#8B1E24',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#6A2E2E',
+    'noteBkgColor': '#F5E6DD',
+    'noteTextColor': '#2E2E2E',
+    'noteBorderColor': '#D9B3A0',
+    'sequenceNumberColor': '#ffffff',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '14px'
+  }
+}}%%
 sequenceDiagram
     autonumber
     actor PM
@@ -95,7 +134,7 @@ sequenceDiagram
 
     PM->>Dep: /frappe-stack:promote
     Dep->>Dep: run pre-promote checklist
-    Note right of Dep: diff clean, all Applied,<br>reviewer green, tester at 80% or more,<br>backup recent, roles covered,<br>not Friday afternoon
+    Note right of Dep: diff clean, all Applied,<br>reviewer green, tester at 80% or more,<br>backup recent, roles covered
     Dep->>Repo: exporter writes per-blueprint JSONs
     Dep->>Repo: committer creates branch and commits
     Dep->>GH: pr_opener via gh CLI or REST fallback
@@ -116,53 +155,14 @@ sequenceDiagram
 
 ## DocType layout (`stack_core`)
 
-```mermaid
-erDiagram
-    STACK_BLUEPRINT ||--o{ STACK_AUDIT_LOG : "logs mutations of"
-    STACK_BLUEPRINT ||--o| STACK_WORKFLOW_DEF : "may extend as"
-    STACK_WORKFLOW_DEF ||--o{ EXPERIMENT_ASSIGNMENT : "tracks A-B in"
+The four DocTypes the support app installs:
 
-    STACK_BLUEPRINT {
-        string blueprint_name PK
-        string blueprint_type "DocType, Workflow, Dashboard, Report, etc"
-        int    version "increments on every save"
-        string status "Draft, Validating, Applied, Failed, Reverted"
-        json   payload "schema-validated per blueprint type"
-        string git_commit_sha "set on /push"
-        datetime applied_at
-        link applied_by "User"
-    }
-    STACK_WORKFLOW_DEF {
-        string workflow_name PK
-        link   target_doctype
-        json   states_json "validated by workflow_validator"
-        json   transitions_json
-        string experiment_id "empty means no experiment"
-        string experiment_status "Running, Paused, Promoted, Abandoned"
-    }
-    EXPERIMENT_ASSIGNMENT {
-        link   doc_reference "Dynamic Link to experimented doc"
-        link   workflow
-        string experiment_id "indexed"
-        string arm "arm_a or arm_b"
-        datetime assigned_at
-        string outcome "pending, approved, rejected, cancelled, expired"
-        datetime outcome_at
-        int cycle_time_seconds
-    }
-    STACK_AUDIT_LOG {
-        link   actor "User, indexed"
-        string action "api.build_doctype, blueprint.update, etc"
-        link   blueprint "optional"
-        datetime timestamp "indexed"
-        string result "success, failure, denied"
-        string ip_address
-        text   before_json
-        text   after_json
-    }
-```
-
-`Stack Audit Log` is append-only. Hard delete is blocked by an `on_trash` hook plus a `before_delete` doc event registered on `*` in `hooks.py`. `permission_query` exposes only own-rows to `Stack Author`; full table to `System Manager` and `Stack Admin`.
+| DocType | Holds | Notable |
+|---|---|---|
+| **Stack Blueprint** | Versioned JSON config — DocType, Workflow, Dashboard, Report, Custom Field, Property Setter | `status` flips Draft → Validating → Applied. `git_commit_sha` set on `/push`. |
+| **Stack Workflow Def** | Workflow definition + experiment metadata | Validates states, transitions, traffic split sums to 100. Optional `experiment_id` enables A/B. |
+| **Experiment Assignment** | One row per A/B-tracked document | Append-only. Hard-delete blocked. Records `arm`, `outcome`, `cycle_time_seconds`. |
+| **Stack Audit Log** | Every API mutation + actor + timestamp + before/after JSON | Append-only. Hard-delete blocked. `permission_query` restricts non-admins to their own rows. |
 
 ## Layered enforcement
 
@@ -184,21 +184,21 @@ The same rule appears at multiple layers — defense in depth.
 Two audit trails, deliberately:
 
 - **`.frappe-stack/audit.jsonl`** (local) — every tool call (Bash / Edit / Write) by the PM in their session. Independent of network. Useful when the site is unreachable.
-- **`Stack Audit Log` DocType** (remote, on the site) — every API call, every blueprint mutation, with actor + IP + before / after. Append-only, queryable from desk.
+- **`Stack Audit Log` DocType** (remote, on the site) — every API call and blueprint mutation, with actor, IP, before / after. Append-only, queryable from the desk.
 
-Both are durable and inspectable. Disagreement between them is itself diagnostic — surfaced by the `analyst` agent on demand.
+Both are durable. Disagreement between them is itself diagnostic — the `analyst` agent can surface the gap on demand.
 
 ## Failure modes the system handles
 
 | Failure | What happens |
 |---|---|
 | `gh` CLI not installed | `pr_opener.py` falls back to GitHub REST API |
-| GitHub token absent | `pr_opener.py` raises clear error; operator must configure |
+| GitHub token absent | `pr_opener.py` raises a clear error; operator configures it |
 | Working tree dirty before promote | `committer.py` refuses; surfaces existing changes |
-| Network down during commit | Commits locally; push fails; can be retried later |
-| Schema migration fails on prod | CI auto-restores backup + reverts merge + pages on-call |
-| Token leaked | Operator runs the rotate-keys runbook; old token invalidated immediately |
-| Blueprint validation fails on apply | Stack Blueprint marked `status=Failed` with `validation_errors` set |
+| Network down during commit | Commits locally; push retries |
+| Schema migration fails on prod | CI auto-restores backup, reverts merge, pages on-call |
+| Token leaked | Operator runs the rotate-keys runbook; old token invalidated |
+| Blueprint validation fails on apply | `Stack Blueprint.status = Failed` with `validation_errors` set |
 | Drift detected daily | `applier.reconcile_drift` logs an Error Log entry |
 
 See [`SECURITY.md §5`](../SECURITY.md#5-incident-response) for the formal incident protocol.
